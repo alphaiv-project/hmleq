@@ -1,0 +1,11 @@
+[package]
+name = "hmleq"
+version = "0.1.0"
+edition = "2021"
+description = "Parser for the Hancom HWP(한글) equation script language, with a LaTeX emitter"
+license = "MIT"
+repository = "https://github.com/alphaiv-project/hmleq"
+keywords = ["hwp", "hml", "equation", "latex", "parser"]
+categories = ["parser-implementations"]
+
+[dependencies]
