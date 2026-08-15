@@ -4,6 +4,7 @@ use std::fmt;
 
 /// A lexing/parsing error with the byte offset where it was detected.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ParseError {
     pub message: String,
     /// Byte offset into the source string.
@@ -12,7 +13,10 @@ pub struct ParseError {
 
 impl ParseError {
     pub fn new(message: impl Into<String>, position: usize) -> Self {
-        Self { message: message.into(), position }
+        Self {
+            message: message.into(),
+            position,
+        }
     }
 }
 

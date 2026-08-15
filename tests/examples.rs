@@ -7,6 +7,7 @@
 //! These strings are the contract: when one of them fails, the implementation is
 //! wrong, not the expectation. Inputs are transcribed verbatim from the table —
 //! note that in the table's markdown cells `\|` stands for a literal `|` (row 7).
+#![cfg(feature = "latex")]
 
 use hmleq::{eq_to_latex, parse};
 

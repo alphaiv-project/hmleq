@@ -49,6 +49,7 @@ pub struct SymDef {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MatrixKind {
     /// `matrix` — no fences.
     Plain,
@@ -69,6 +70,7 @@ pub enum MatrixKind {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum StyleKind {
     /// `rm`
     Roman,
@@ -454,6 +456,14 @@ fn ci_cmd(word: &str) -> Option<Cmd> {
 
 fn find(table: &'static [SymDef], name: &str) -> Option<&'static SymDef> {
     table.iter().find(|d| d.name == name)
+}
+
+/// Find a symbol by its canonical `name`, case-sensitively, across both
+/// tables. This is the inverse of serializing a symbol as its name (the
+/// serde representation of `Node::Symbol`/`Node::Accent`): every table entry
+/// has a unique canonical name, so `find_by_name(def.name)` returns `def`.
+pub fn find_by_name(name: &str) -> Option<&'static SymDef> {
+    find(EXACT_SYMS, name).or_else(|| find(CI_SYMS, name))
 }
 
 fn ci_lookup(lower: &str) -> Option<Keyword> {

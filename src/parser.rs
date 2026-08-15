@@ -317,7 +317,7 @@ impl Parser {
             Cmd::Big(size) => {
                 let arg = self.operand_primary(stop, &name)?;
                 Ok(Node::Big {
-                    size,
+                    size: size.to_string(),
                     arg: Box::new(arg),
                 })
             }

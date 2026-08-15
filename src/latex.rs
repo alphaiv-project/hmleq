@@ -493,7 +493,7 @@ mod tests {
         assert_eq!(to_latex(&Node::Not(Box::new(op("=")))), r"\not =");
         assert_eq!(
             to_latex(&Node::Big {
-                size: r"\bigg",
+                size: r"\bigg".to_string(),
                 arg: Box::new(op("/"))
             }),
             r"\bigg /"

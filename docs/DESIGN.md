@@ -19,8 +19,14 @@ output). Where this file makes a choice REFERENCE.md leaves open, this file wins
 | `src/latex.rs` | `to_latex()` | agent **latex** |
 | `tests/examples.rs` | integration tests | agent **tests** |
 
-No external crates. Rust 2021, std only. Each agent owns exactly one file and must not
-edit any other.
+Rust 2021. The core (lexer/parser/AST) is dependency-free; cargo features add the rest:
+`latex` *(default)* gates the emitter, `to_latex`/`eq_to_latex` and the CLI; `serde`
+(optional dep) derives `Serialize`/`Deserialize` on the AST — symbols serialize as their
+canonical keyword name and deserialize through `symbols::find_by_name`, `Big` sizes are
+validated against the four LaTeX size commands; `json` adds the CLI's `--json` output.
+
+*(The per-file agent ownership below applied to the initial build workflow and is kept
+for historical context.)* Each agent owns exactly one file and must not edit any other.
 
 ## 1. Lexer — `lex(src: &str) -> Result<Vec<Token>, ParseError>`
 

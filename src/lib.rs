@@ -1,19 +1,29 @@
-//! hmleq — parser for the Hancom HWP(한글) equation script language,
-//! with a LaTeX emitter.
+//! hmleq — parser for the Hancom HWP(한글) equation script language.
 //!
 //! The language is the script syntax of the HWP equation editor
 //! (`x = {-b +- sqrt{b^2 - 4ac}} over {2a}` and friends). See
 //! `docs/REFERENCE.md` for the language and `docs/DESIGN.md` for the
-//! architecture and the exact LaTeX mappings.
+//! architecture and the exact output mappings.
+//!
+//! The primary product is the [`Node`] AST:
 //!
 //! ```
-//! assert_eq!(hmleq::eq_to_latex("1 over 2").unwrap(), r"\frac{1}{2}");
-//! assert_eq!(hmleq::eq_to_latex("sin x").unwrap(), r"\sin x");
-//! assert_eq!(hmleq::eq_to_latex("sinx").unwrap(), "sinx");
+//! let ast = hmleq::parse("1 over 2").unwrap();
+//! assert!(matches!(ast, hmleq::Node::Frac { .. }));
 //! ```
+//!
+//! # Features
+//!
+//! - `latex` *(default)* — the [`latex`] module plus [`to_latex`] /
+//!   [`eq_to_latex`] and the `hmleq` CLI.
+//! - `serde` — `Serialize`/`Deserialize` on the whole AST. Symbols serialize
+//!   as their canonical keyword name and are resolved back through the
+//!   keyword table on deserialization, so trees round-trip.
+//! - `json` — `--json` output in the CLI (implies `serde`).
 
 pub mod ast;
 pub mod error;
+#[cfg(feature = "latex")]
 pub mod latex;
 pub mod lexer;
 pub mod parser;
@@ -29,11 +39,19 @@ pub fn parse(src: &str) -> Result<Node, ParseError> {
 }
 
 /// Render an AST as LaTeX.
+#[cfg(feature = "latex")]
 pub fn to_latex(node: &Node) -> String {
     latex::to_latex(node)
 }
 
 /// Convenience: parse an equation script and render it as LaTeX.
+///
+/// ```
+/// assert_eq!(hmleq::eq_to_latex("1 over 2").unwrap(), r"\frac{1}{2}");
+/// assert_eq!(hmleq::eq_to_latex("sin x").unwrap(), r"\sin x");
+/// assert_eq!(hmleq::eq_to_latex("sinx").unwrap(), "sinx");
+/// ```
+#[cfg(feature = "latex")]
 pub fn eq_to_latex(src: &str) -> Result<String, ParseError> {
     Ok(to_latex(&parse(src)?))
 }
