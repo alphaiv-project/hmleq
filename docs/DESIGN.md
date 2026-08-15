@@ -7,26 +7,26 @@ output). Where this file makes a choice REFERENCE.md leaves open, this file wins
 
 ## Module map / ownership
 
-| File | Contents | Status |
-|---|---|---|
-| `src/error.rs` | `ParseError` | FROZEN -- do not modify |
-| `src/token.rs` | `Token`, `TokenKind` | FROZEN -- do not modify |
-| `src/ast.rs` | `Node`, `SpaceKind` | FROZEN -- do not modify |
-| `src/lib.rs`, `src/bin/hmleq.rs` | public API, CLI | FROZEN -- do not modify |
-| `src/symbols.rs` | keyword tables + `lookup()` | agent **symbols** (pub types are FROZEN; rewrite the rest) |
-| `src/lexer.rs` | `lex()` | agent **lexer** |
-| `src/parser.rs` | `parse()` | agent **parser** |
-| `src/latex.rs` | `to_latex()` | agent **latex** |
-| `tests/examples.rs` | integration tests | agent **tests** |
+| File                             | Contents                    | Status                                                     |
+| -------------------------------- | --------------------------- | ---------------------------------------------------------- |
+| `src/error.rs`                   | `ParseError`                | FROZEN -- do not modify                                    |
+| `src/token.rs`                   | `Token`, `TokenKind`        | FROZEN -- do not modify                                    |
+| `src/ast.rs`                     | `Node`, `SpaceKind`         | FROZEN -- do not modify                                    |
+| `src/lib.rs`, `src/bin/hmleq.rs` | public API, CLI             | FROZEN -- do not modify                                    |
+| `src/symbols.rs`                 | keyword tables + `lookup()` | agent **symbols** (pub types are FROZEN; rewrite the rest) |
+| `src/lexer.rs`                   | `lex()`                     | agent **lexer**                                            |
+| `src/parser.rs`                  | `parse()`                   | agent **parser**                                           |
+| `src/latex.rs`                   | `to_latex()`                | agent **latex**                                            |
+| `tests/examples.rs`              | integration tests           | agent **tests**                                            |
 
 Rust 2021. The core (lexer/parser/AST) is dependency-free; cargo features add the rest:
-`latex` *(default)* gates the emitter, `to_latex`/`eq_to_latex` and the CLI; `serde`
+`latex` _(default)_ gates the emitter, `to_latex`/`eq_to_latex` and the CLI; `serde`
 (optional dep) derives `Serialize`/`Deserialize` on the AST -- symbols serialize as their
 canonical keyword name and deserialize through `symbols::find_by_name`, `Big` sizes are
 validated against the four LaTeX size commands; `json` adds the CLI's `--json` output.
 
-*(The per-file agent ownership below applied to the initial build workflow and is kept
-for historical context.)* Each agent owns exactly one file and must not edit any other.
+_(The per-file agent ownership below applied to the initial build workflow and is kept
+for historical context.)_ Each agent owns exactly one file and must not edit any other.
 
 ## 1. Lexer -- `lex(src: &str) -> Result<Vec<Token>, ParseError>`
 
@@ -68,7 +68,7 @@ rarrow lim big bigg pi ...`. Consequences: `SQRT`->sqrt, `Sqrt`->sqrt, `RARROW`-
 
 ## 3. Parser -- recursive descent
 
-`parser::parse(src)` lexes internally, parses a *sequence* to EOF, and returns the
+`parser::parse(src)` lexes internally, parses a _sequence_ to EOF, and returns the
 collapsed node (`Node::seq`). A **sequence** is a `Vec<Node>` parsed until its stop token
 (`}` for groups, `RIGHT` for delimited bodies, EOF at top level); collapse with
 `Node::seq` (1 item -> itself, else `Row`; empty -> `Row(vec![])`).
@@ -83,7 +83,7 @@ scripted-term as the right operand (missing -> `"over: missing right operand"`),
 
 ### scripted-term
 
-One *prefixed-primary*, then any number of script markers: `Caret`/keyword `sup` ->
+One _prefixed-primary_, then any number of script markers: `Caret`/keyword `sup` ->
 superscript; `Underscore`/keyword `sub` -> subscript. Each marker takes exactly **one**
 following prefixed-primary as its argument. A second sup (or sub) on the same base ->
 error `"duplicate superscript"` / `"duplicate subscript"`. Wrap in
@@ -109,7 +109,7 @@ error `"duplicate superscript"` / `"duplicate subscript"`. Wrap in
 - **Style keywords** `rm it bold rmbold` -> body := the rest of the current sequence
   (parse remaining items with full infix handling until the sequence's stop token), then
   `Style{style, body}`. Thus `rm` scope ends at the enclosing `}` / `RIGHT` / EOF, and a
-  later `it` inside simply starts a nested `Style{Italic, ...}` covering *its* remainder.
+  later `it` inside simply starts a nested `Style{Italic, ...}` covering _its_ remainder.
 - **`LEFT`** -> next token must be an `Op` whose text is a valid delimiter (§5 delimiter
   map) -- else error `"LEFT: expected delimiter"`; body := sequence stopping at `RIGHT`
   (EOF first -> error `"LEFT without RIGHT"`); after `RIGHT`, read its delimiter the same
@@ -149,28 +149,28 @@ argument is a single token. The only exception is a **script base**, emitted bar
 it is a `Row` of ≥ 2 items (then wrapped in `{...}`), and the **root degree**, emitted bare
 inside `\sqrt[...]`.
 
-| Node | Output |
-|---|---|
-| `Number`/`Ident`/`Op` (non-ligature) | verbatim (`sinx` stays `sinx`) |
-| `Op` ligature | `+-`->`\pm` `-+`->`\mp` `!=`->`\neq` `<=`->`\leq` `>=`->`\geq` `<<`->`\ll` `>>`->`\gg` `||`->`\Vert` |
-| `Text(s)` | `\text{s}` -- escape `\ { } $ & # _ ^ % ~` (backslash forms; `\textbackslash{}` for `\`, `\textasciitilde{}` for `~`, `\textasciicircum{}` for `^`) |
-| `Symbol(d)` | `d.latex`; **BigOp not directly under a `Script`** with `bin_latex: Some(b)` -> `b` |
-| `Space(Full)` | `\;` |
-| `Space(Quarter)` | `\,` |
-| `Newline` / `Align` | `\\` / `&` |
-| `Frac{bar:true}` | `\frac{num}{den}` |
-| `Frac{bar:false}` | `{num \atop den}` |
-| `Binom` | `\binom{top}{bottom}` |
-| `Sqrt` | `\sqrt{x}` |
-| `Root` | `\sqrt[deg]{x}` (deg emitted bare) |
-| `Script` | base′ then `_{sub}` then `^{sup}` (sub first when both). base′: bare unless `Row`≥2 -> `{...}`. If base is `Symbol` with `scripts: Beside` -> emit `d.latex` + `\nolimits` before the scripts. `Below`/`Normal` -> nothing extra. A BigOp base always uses `d.latex` (never `bin_latex`). |
-| `Delimited` | `\left` + mapped L + ` ` + body + ` ` + `\right` + mapped R. Delimiter map: `(` `)` `[` `]` `|` `.` as-is; `||`->`\Vert`; `<`->`\langle`; `>`->`\rangle`. (Same map validates delimiters in the parser.) |
-| `Matrix` | `\begin{ENV} c & c \\ c & c \end{ENV}` -- single spaces around cells, `&`, `\\`. ENV: matrix->`matrix`, pmatrix->`pmatrix`, bmatrix->`bmatrix`, dmatrix->`vmatrix`, cases->`cases`, eqalign->`aligned`. pile/lpile/rpile -> `\begin{array}{c|l|r} ... \end{array}` (single column; rows joined with ` \\ `). |
-| `Accent{a, base}` | `a.latex{base}` e.g. `\vec{A}` |
-| `Style` | Roman->`\mathrm{body}`; Bold->`\boldsymbol{body}`; RomanBold->`\mathbf{body}`; Italic->body unwrapped |
-| `BuildRel` | `\overset{top}{base}` |
-| `Not(x)` | `\not ` + emit(x) (space-joined: `\not =`, `\not \in`) |
-| `Big{size, arg}` | size + ` ` + emit(arg) -> `\bigg /` |
+| Node                                 | Output                                                                                                                                                                                                                                                                                    |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Number`/`Ident`/`Op` (non-ligature) | verbatim (`sinx` stays `sinx`)                                                                                                                                                                                                                                                            |
+| `Op` ligature                        | `+-`->`\pm` `-+`->`\mp` `!=`->`\neq` `<=`->`\leq` `>=`->`\geq` `<<`->`\ll` `>>`->`\gg` `                                                                                                                                                                                                  |              | `->`\Vert`                                                  |
+| `Text(s)`                            | `\text{s}` -- escape `\ { } $ & # _ ^ % ~` (backslash forms; `\textbackslash{}` for `\`, `\textasciitilde{}` for `~`, `\textasciicircum{}` for `^`)                                                                                                                                       |
+| `Symbol(d)`                          | `d.latex`; **BigOp not directly under a `Script`** with `bin_latex: Some(b)` -> `b`                                                                                                                                                                                                       |
+| `Space(Full)`                        | `\;`                                                                                                                                                                                                                                                                                      |
+| `Space(Quarter)`                     | `\,`                                                                                                                                                                                                                                                                                      |
+| `Newline` / `Align`                  | `\\` / `&`                                                                                                                                                                                                                                                                                |
+| `Frac{bar:true}`                     | `\frac{num}{den}`                                                                                                                                                                                                                                                                         |
+| `Frac{bar:false}`                    | `{num \atop den}`                                                                                                                                                                                                                                                                         |
+| `Binom`                              | `\binom{top}{bottom}`                                                                                                                                                                                                                                                                     |
+| `Sqrt`                               | `\sqrt{x}`                                                                                                                                                                                                                                                                                |
+| `Root`                               | `\sqrt[deg]{x}` (deg emitted bare)                                                                                                                                                                                                                                                        |
+| `Script`                             | base′ then `_{sub}` then `^{sup}` (sub first when both). base′: bare unless `Row`≥2 -> `{...}`. If base is `Symbol` with `scripts: Beside` -> emit `d.latex` + `\nolimits` before the scripts. `Below`/`Normal` -> nothing extra. A BigOp base always uses `d.latex` (never `bin_latex`). |
+| `Delimited`                          | `\left` + mapped L + ` ` + body + ` ` + `\right` + mapped R. Delimiter map: `(` `)` `[` `]` `                                                                                                                                                                                             | ` `.`as-is;` |                                                             | `->`\Vert`; `<`->`\langle`; `>`->`\rangle`. (Same map validates delimiters in the parser.) |
+| `Matrix`                             | `\begin{ENV} c & c \\ c & c \end{ENV}` -- single spaces around cells, `&`, `\\`. ENV: matrix->`matrix`, pmatrix->`pmatrix`, bmatrix->`bmatrix`, dmatrix->`vmatrix`, cases->`cases`, eqalign->`aligned`. pile/lpile/rpile -> `\begin{array}{c                                              | l            | r} ... \end{array}`(single column; rows joined with` \\ `). |
+| `Accent{a, base}`                    | `a.latex{base}` e.g. `\vec{A}`                                                                                                                                                                                                                                                            |
+| `Style`                              | Roman->`\mathrm{body}`; Bold->`\boldsymbol{body}`; RomanBold->`\mathbf{body}`; Italic->body unwrapped                                                                                                                                                                                     |
+| `BuildRel`                           | `\overset{top}{base}`                                                                                                                                                                                                                                                                     |
+| `Not(x)`                             | `\not ` + emit(x) (space-joined: `\not =`, `\not \in`)                                                                                                                                                                                                                                    |
+| `Big{size, arg}`                     | size + ` ` + emit(arg) -> `\bigg /`                                                                                                                                                                                                                                                       |
 
 **Top level only:** if the root node is a `Row` containing a `Newline`, wrap the whole
 output in `\begin{aligned} ... \end{aligned}` when an `Align` is also present at top level,
@@ -193,16 +193,16 @@ Default mapping: the LaTeX command spelled like the keyword (`\alpha`, `\beta`,
   `udarrow`->`\updownarrow`; exact `LARROW`->`\Leftarrow`, `RARROW`->`\Rightarrow`,
   `LRARROW`->`\Leftrightarrow`, `UDARROW`->`\Updownarrow`; `hookleft`->`\hookleftarrow`,
   `hookright`->`\hookrightarrow`; CI long aliases `leftarrow rightarrow leftrightarrow
-  updownarrow` and exact `Leftarrow Rightarrow Leftrightarrow Updownarrow`.
+updownarrow` and exact `Leftarrow Rightarrow Leftrightarrow Updownarrow`.
 - Big operators (kind `BigOp`): `sum`->`\sum`, `prod`->`\prod` (scripts `Below`,
   `bin_latex: None`); `union`->`\bigcup`/bin `\cup`, `inter`->`\bigcap`/bin `\cap`,
   `dsum`->`\bigoplus`/bin `\oplus` (scripts `Below`); `int`->`\int`, `oint`->`\oint`,
   `dint`->`\iint`, `tint`->`\iiint`, `odint`->`\oiint`, `otint`->`\oiiint` (scripts
   `Normal`, `bin_latex: None`); `smallsum smallprod smallint smalloint smallunion
-  smallinter` -> same latex as the base operator (`\sum`, ..., `\bigcup`, `\bigcap`) with
+smallinter` -> same latex as the base operator (`\sum`, ..., `\bigcup`, `\bigcap`) with
   scripts `Beside`, `bin_latex: None`.
 - Functions (kind `Func`, scripts `Normal` unless noted): `sin cos tan cot sec csc sinh
-  cosh tanh coth arcsin arccos arctan log ln exp deg arg dim hom ker` -> the same-named
+cosh tanh coth arcsin arccos arctan log ln exp deg arg dim hom ker` -> the same-named
   LaTeX builtin (`\sin` ...); `cosec`->`\csc`; `lg`->`\operatorname{lg}`; `mod`->`\bmod`;
   `if for and or` -> `\operatorname{if}` etc. Scripts `Below`: `lim max min det gcd` and
   exact `Pr` (latex `\lim \max \min \det \gcd \Pr`). Exact `Lim` -> latex `\lim`, scripts
@@ -225,43 +225,43 @@ exactly as they are.
 
 ## 6. Canonical outputs -- tests assert these EXACT strings
 
-| # | script | latex |
-|---|---|---|
-| 1 | `x = {-b +- sqrt{b^2 -4ac}} over {2a}` | `x = \frac{- b \pm \sqrt{b^{2} - 4 ac}}{2 a}` |
-| 2 | `lim _{x rarrow 0} {sin x} over x = 1` | `\lim_{x \rightarrow 0} \frac{\sin x}{x} = 1` |
-| 3 | `int _1 ^2 {3x^2} dx = LEFT[ x^3 RIGHT] _1 ^2 = 7` | `\int_{1}^{2} 3 x^{2} dx = \left[ x^{3} \right]_{1}^{2} = 7` |
-| 4 | `sum _{n=1} ^{inf} {1 over n^2} = {pi^2} over 6` | `\sum_{n = 1}^{\infty} \frac{1}{n^{2}} = \frac{\pi^{2}}{6}` |
-| 5 | `pmatrix { a_1 & b_1 # a_2 & b_2 }` | `\begin{pmatrix} a_{1} & b_{1} \\ a_{2} & b_{2} \end{pmatrix}` |
-| 6 | `f(x) = cases { x^2 & (x geq 0) # -x & (x < 0) }` | `f ( x ) = \begin{cases} x^{2} & ( x \geq 0 ) \\ - x & ( x < 0 ) \end{cases}` |
-| 7 | `A inter B = { x \| x in A ~and~ x in B }` | `A \cap B = x \| x \in A \; \operatorname{and} \; x \in B` |
-| 8 | `sinh x` | `\sinh x` |
-| 9 | `sinx` | `sinx` |
-| 10 | `sin x` | `\sin x` |
-| 11 | `pi le` | `\pi le` |
-| 12 | `pile {a # b}` | `\begin{array}{c} a \\ b \end{array}` |
-| 13 | `not =` | `\not =` |
-| 14 | `a^2 2` | `a^{2} 2` |
-| 15 | `x sub i sup 2` | `x_{i}^{2}` |
-| 16 | `root 3 of {x+1}` | `\sqrt[3]{x + 1}` |
-| 17 | `n choose k` | `\binom{n}{k}` |
-| 18 | `SQRT 2` | `\sqrt{2}` |
-| 19 | `vec A` | `\vec{A}` |
-| 20 | `"hello world"` | `\text{hello world}` |
-| 21 | `LEFT ( x over y RIGHT )` | `\left( \frac{x}{y} \right)` |
-| 22 | `a != b` | `a \neq b` |
-| 23 | `Lim _{n} a_n` | `\lim\nolimits_{n} a_{n}` |
-| 24 | `H_2 O` | `H_{2} O` |
-| 25 | `Alpha + alpha` | `A + \alpha` |
-| 26 | `rm ABC` | `\mathrm{ABC}` |
-| 27 | `a over b over c` | `\frac{\frac{a}{b}}{c}` |
-| 28 | `{a + b}^2` | `{a + b}^{2}` |
-| 29 | `x atop y` | `{x \atop y}` |
-| 30 | `A union B` | `A \cup B` |
-| 31 | `union _{i=1} ^{n} A_i` | `\bigcup_{i = 1}^{n} A_{i}` |
-| 32 | `vec A^2` | `\vec{A}^{2}` |
-| 33 | `a ~ b `` ` `` c` | `a \; b \, c` |
-| 34 | `buildrel def over =` | `\overset{def}{=}` |
-| 35 | `smallsum _{k} a_k` | `\sum\nolimits_{k} a_{k}` |
+| #   | script                                             | latex                                                                         |
+| --- | -------------------------------------------------- | ----------------------------------------------------------------------------- |
+| 1   | `x = {-b +- sqrt{b^2 -4ac}} over {2a}`             | `x = \frac{- b \pm \sqrt{b^{2} - 4 ac}}{2 a}`                                 |
+| 2   | `lim _{x rarrow 0} {sin x} over x = 1`             | `\lim_{x \rightarrow 0} \frac{\sin x}{x} = 1`                                 |
+| 3   | `int _1 ^2 {3x^2} dx = LEFT[ x^3 RIGHT] _1 ^2 = 7` | `\int_{1}^{2} 3 x^{2} dx = \left[ x^{3} \right]_{1}^{2} = 7`                  |
+| 4   | `sum _{n=1} ^{inf} {1 over n^2} = {pi^2} over 6`   | `\sum_{n = 1}^{\infty} \frac{1}{n^{2}} = \frac{\pi^{2}}{6}`                   |
+| 5   | `pmatrix { a_1 & b_1 # a_2 & b_2 }`                | `\begin{pmatrix} a_{1} & b_{1} \\ a_{2} & b_{2} \end{pmatrix}`                |
+| 6   | `f(x) = cases { x^2 & (x geq 0) # -x & (x < 0) }`  | `f ( x ) = \begin{cases} x^{2} & ( x \geq 0 ) \\ - x & ( x < 0 ) \end{cases}` |
+| 7   | `A inter B = { x \| x in A ~and~ x in B }`         | `A \cap B = x \| x \in A \; \operatorname{and} \; x \in B`                    |
+| 8   | `sinh x`                                           | `\sinh x`                                                                     |
+| 9   | `sinx`                                             | `sinx`                                                                        |
+| 10  | `sin x`                                            | `\sin x`                                                                      |
+| 11  | `pi le`                                            | `\pi le`                                                                      |
+| 12  | `pile {a # b}`                                     | `\begin{array}{c} a \\ b \end{array}`                                         |
+| 13  | `not =`                                            | `\not =`                                                                      |
+| 14  | `a^2 2`                                            | `a^{2} 2`                                                                     |
+| 15  | `x sub i sup 2`                                    | `x_{i}^{2}`                                                                   |
+| 16  | `root 3 of {x+1}`                                  | `\sqrt[3]{x + 1}`                                                             |
+| 17  | `n choose k`                                       | `\binom{n}{k}`                                                                |
+| 18  | `SQRT 2`                                           | `\sqrt{2}`                                                                    |
+| 19  | `vec A`                                            | `\vec{A}`                                                                     |
+| 20  | `"hello world"`                                    | `\text{hello world}`                                                          |
+| 21  | `LEFT ( x over y RIGHT )`                          | `\left( \frac{x}{y} \right)`                                                  |
+| 22  | `a != b`                                           | `a \neq b`                                                                    |
+| 23  | `Lim _{n} a_n`                                     | `\lim\nolimits_{n} a_{n}`                                                     |
+| 24  | `H_2 O`                                            | `H_{2} O`                                                                     |
+| 25  | `Alpha + alpha`                                    | `A + \alpha`                                                                  |
+| 26  | `rm ABC`                                           | `\mathrm{ABC}`                                                                |
+| 27  | `a over b over c`                                  | `\frac{\frac{a}{b}}{c}`                                                       |
+| 28  | `{a + b}^2`                                        | `{a + b}^{2}`                                                                 |
+| 29  | `x atop y`                                         | `{x \atop y}`                                                                 |
+| 30  | `A union B`                                        | `A \cup B`                                                                    |
+| 31  | `union _{i=1} ^{n} A_i`                            | `\bigcup_{i = 1}^{n} A_{i}`                                                   |
+| 32  | `vec A^2`                                          | `\vec{A}^{2}`                                                                 |
+| 33  | `a ~ b `` ` `` c`                                  | `a \; b \, c`                                                                 |
+| 34  | `buildrel def over =`                              | `\overset{def}{=}`                                                            |
+| 35  | `smallsum _{k} a_k`                                | `\sum\nolimits_{k} a_{k}`                                                     |
 
 Notes: in #7, `\|` inside the table cells denotes a literal pipe character `|` in both
 the input and the output. #33 written out: the input is `a`, tilde, `b`, backquote, `c`

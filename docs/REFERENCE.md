@@ -21,7 +21,6 @@
 ## 1. 개요
 
 한글 수식 편집기(단축키 `Ctrl+N,M`)는 WYSIWYG 편집 창과 **스크립트 입력 창**을 함께 제공한다.
-스크립트는 LaTeX가 아니라 옛 troff/eqn 계열에 가까운 독자 문법으로, 다음과 같은 형태다.
 
 ```text
 x = {-b +- sqrt{b^2 - 4ac}} over {2a}
@@ -38,16 +37,16 @@ x = {-b +- sqrt{b^2 - 4ac}} over {2a}
 
 수식 스크립트는 먼저 **항(token) 단위로 잘라 읽는다.** 항을 구분하는 요소는 다음과 같다.
 
-| 구분자 | 역할 |
-|---|---|
-| 빈칸, 줄바꿈(Enter), 탭 | 항과 항을 구분한다 (출력에는 나타나지 않음) |
-| `{ }` | 여러 항을 하나의 항으로 묶는다 (분자·분모, 첨자 범위 등에서 필수) |
-| `^` / `_` | 위첨자 / 아래첨자 (바로 뒤 한 항에만 적용, 여러 항이면 `{}`로 묶기) |
-| `#` | 줄 바꾸기 |
-| `&` | 여러 줄에서 세로 위치 맞춤 (행렬의 열 구분에도 사용) |
-| `~` | 출력되는 빈칸 (한 칸) |
-| `` ` `` | 출력되는 1/4 크기 빈칸 |
-| `" "` | 문자열을 통째로 하나의 낱말로 처리. **9자 이상 낱말은 반드시 따옴표로 묶어야 한다** |
+| 구분자                  | 역할                                                                                |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| 빈칸, 줄바꿈(Enter), 탭 | 항과 항을 구분한다 (출력에는 나타나지 않음)                                         |
+| `{ }`                   | 여러 항을 하나의 항으로 묶는다 (분자·분모, 첨자 범위 등에서 필수)                   |
+| `^` / `_`               | 위첨자 / 아래첨자 (바로 뒤 한 항에만 적용, 여러 항이면 `{}`로 묶기)                 |
+| `#`                     | 줄 바꾸기                                                                           |
+| `&`                     | 여러 줄에서 세로 위치 맞춤 (행렬의 열 구분에도 사용)                                |
+| `~`                     | 출력되는 빈칸 (한 칸)                                                               |
+| `` ` ``                 | 출력되는 1/4 크기 빈칸                                                              |
+| `" "`                   | 문자열을 통째로 하나의 낱말로 처리. **9자 이상 낱말은 반드시 따옴표로 묶어야 한다** |
 
 핵심 원칙 한 줄 요약: **"앞 식과 끊을 땐 빈칸, 뒤 식과 묶을 땐 `{}`."**
 
@@ -62,15 +61,15 @@ x = {-b +- sqrt{b^2 - 4ac}} over {2a}
 
 키워드끼리 접두사 관계인 쌍이 실제로 많다.
 
-| 접두사 쌍 | 의미 |
-|---|---|
-| `in` / `inf` / `int` / `inter` | ∈ / ∞ / ∫ / ∩ |
+| 접두사 쌍                                                      | 의미                  |
+| -------------------------------------------------------------- | --------------------- |
+| `in` / `inf` / `int` / `inter`                                 | ∈ / ∞ / ∫ / ∩         |
 | `sin` / `sinh`, `cos` / `cosh`, `tan` / `tanh`, `cot` / `coth` | 삼각함수 / 쌍곡선함수 |
-| `pi` / `pile` | π / 세로 쌓기 명령 |
-| `dot` / `doteq` | 점 장식 / ≐ |
-| `sim` / `simeq` | ∼ / ≃ |
-| `sub` / `subset` / `subseteq` | 아래첨자 / ⊂ / ⊆ |
-| `sup` / `supset` / `supseteq` | 위첨자 / ⊃ / ⊇ |
+| `pi` / `pile`                                                  | π / 세로 쌓기 명령    |
+| `dot` / `doteq`                                                | 점 장식 / ≐           |
+| `sim` / `simeq`                                                | ∼ / ≃                 |
+| `sub` / `subset` / `subseteq`                                  | 아래첨자 / ⊂ / ⊆      |
+| `sup` / `supset` / `supseteq`                                  | 위첨자 / ⊃ / ⊇        |
 
 즉 "키워드를 서로 non-prefix가 되도록 설계했다"는 가설은 성립하지 않는다.
 
@@ -99,11 +98,11 @@ x = {-b +- sqrt{b^2 - 4ac}} over {2a}
 
 ### 3.3 요약
 
-| 가설 | 판정 |
-|---|---|
-| 키워드들이 서로 non-prefix(접두사 없는 집합)이다 | ❌ -- `in`/`int`, `pi`/`pile` 등 접두사 쌍이 다수 존재 |
-| 문자 단위 최장 접두사(greedy) 매칭이다 | ❌ -- `sinx`가 `sin`+`x`로 분해되지 않음 |
-| **구분자로 낱말을 자른 뒤 낱말 전체를 정확 일치로 조회** | ✅ -- 접두사 모호성은 토큰 경계에서 해소 |
+| 가설                                                     | 판정                                                   |
+| -------------------------------------------------------- | ------------------------------------------------------ |
+| 키워드들이 서로 non-prefix(접두사 없는 집합)이다         | ❌ -- `in`/`int`, `pi`/`pile` 등 접두사 쌍이 다수 존재 |
+| 문자 단위 최장 접두사(greedy) 매칭이다                   | ❌ -- `sinx`가 `sin`+`x`로 분해되지 않음               |
+| **구분자로 낱말을 자른 뒤 낱말 전체를 정확 일치로 조회** | ✅ -- 접두사 모호성은 토큰 경계에서 해소               |
 
 > 참고: 공식 파일 형식 문서(rev 1.3)도 형식적 어휘분석 규칙(정규문법)을 명시하지는 않는다.
 > 위 동작은 문서의 토큰 구분 규칙 + 편집기의 실제 동작(커뮤니티에서 널리 검증된 사례)에
@@ -115,43 +114,43 @@ x = {-b +- sqrt{b^2 - 4ac}} over {2a}
 
 ### 4.1 기본 구조
 
-| 스크립트 | 결과 | 예시 |
-|---|---|---|
-| `A over B` | 분수 A/B | `1 over 2` |
-| `A atop B` | 분수선 없는 위아래 배치 | `x atop y` |
-| `sqrt {A}` | 제곱근 √A | `sqrt 2` |
-| `root n of {A}` | n제곱근 | `root 3 of {x+1}` |
-| `A ^ {B}` (또는 `sup`) | 위첨자 | `E = mc^2` |
-| `A _ {B}` (또는 `sub`) | 아래첨자 | `H_2 O` |
-| `LEFT ( ... RIGHT )` | 내용 크기에 맞게 늘어나는 괄호 | `LEFT( x over y RIGHT)` |
-| `bigg` | 기호 크기 확대 | `{a+b} over {a-b} bigg / {x+y}` |
-| `not` | 뒤 기호에 부정 사선 | `not =` -> ≠ |
+| 스크립트               | 결과                           | 예시                            |
+| ---------------------- | ------------------------------ | ------------------------------- |
+| `A over B`             | 분수 A/B                       | `1 over 2`                      |
+| `A atop B`             | 분수선 없는 위아래 배치        | `x atop y`                      |
+| `sqrt {A}`             | 제곱근 √A                      | `sqrt 2`                        |
+| `root n of {A}`        | n제곱근                        | `root 3 of {x+1}`               |
+| `A ^ {B}` (또는 `sup`) | 위첨자                         | `E = mc^2`                      |
+| `A _ {B}` (또는 `sub`) | 아래첨자                       | `H_2 O`                         |
+| `LEFT ( ... RIGHT )`   | 내용 크기에 맞게 늘어나는 괄호 | `LEFT( x over y RIGHT)`         |
+| `bigg`                 | 기호 크기 확대                 | `{a+b} over {a-b} bigg / {x+y}` |
+| `not`                  | 뒤 기호에 부정 사선            | `not =` -> ≠                    |
 
 ### 4.2 대형 연산자 (극한·합·적분·집합)
 
-| 스크립트 | 결과 |
-|---|---|
-| `lim` / `Lim` | 극한 (아래 첨자 위치가 다름 -- 대소문자 구분 필수) |
-| `sum` | ∑ -- `sum_{k=1}^{n}` |
-| `prod` | ∏ |
-| `int`, `oint` | ∫, ∮ |
-| `dint`, `tint`, `odint`, `otint` | ∬, ∭, ∯, ∰ |
-| `union`, `inter` | ⋃, ⋂ (대형) |
-| `small` + 연산자 (예: `smallsum`, `smallint`) | 첨자가 옆에 붙는 작은 기호 |
+| 스크립트                                      | 결과                                               |
+| --------------------------------------------- | -------------------------------------------------- |
+| `lim` / `Lim`                                 | 극한 (아래 첨자 위치가 다름 -- 대소문자 구분 필수) |
+| `sum`                                         | ∑ -- `sum_{k=1}^{n}`                               |
+| `prod`                                        | ∏                                                  |
+| `int`, `oint`                                 | ∫, ∮                                               |
+| `dint`, `tint`, `odint`, `otint`              | ∬, ∭, ∯, ∰                                         |
+| `union`, `inter`                              | ⋃, ⋂ (대형)                                        |
+| `small` + 연산자 (예: `smallsum`, `smallint`) | 첨자가 옆에 붙는 작은 기호                         |
 
 ### 4.3 행렬·배치·조합
 
-| 스크립트 | 결과 |
-|---|---|
-| `matrix { a & b # c & d }` | 괄호 없는 행렬 (`&` 열 구분, `#` 행 구분) |
-| `pmatrix { ... }` | ( ) 행렬 |
-| `bmatrix { ... }` | [ ] 행렬 |
-| `dmatrix { ... }` | \| \| 행렬(행렬식) |
-| `cases { ... # ... }` | 경우 나누기 (왼쪽 `{`) |
-| `pile { ... # ... }` / `lpile` / `rpile` | 세로 쌓기 (가운데/왼쪽/오른쪽 정렬) |
-| `eqalign { ... & ... # ... }` | `&` 기준 여러 줄 세로 맞춤 |
-| `n choose k`, `binom {n}{k}` | 조합 기호 |
-| `rel`, `buildrel` | 화살표 위·아래에 관계식 얹기 |
+| 스크립트                                 | 결과                                      |
+| ---------------------------------------- | ----------------------------------------- |
+| `matrix { a & b # c & d }`               | 괄호 없는 행렬 (`&` 열 구분, `#` 행 구분) |
+| `pmatrix { ... }`                        | ( ) 행렬                                  |
+| `bmatrix { ... }`                        | [ ] 행렬                                  |
+| `dmatrix { ... }`                        | \| \| 행렬(행렬식)                        |
+| `cases { ... # ... }`                    | 경우 나누기 (왼쪽 `{`)                    |
+| `pile { ... # ... }` / `lpile` / `rpile` | 세로 쌓기 (가운데/왼쪽/오른쪽 정렬)       |
+| `eqalign { ... & ... # ... }`            | `&` 기준 여러 줄 세로 맞춤                |
+| `n choose k`, `binom {n}{k}`             | 조합 기호                                 |
+| `rel`, `buildrel`                        | 화살표 위·아래에 관계식 얹기              |
 
 ### 4.4 글자 장식
 
@@ -161,12 +160,12 @@ x = {-b +- sqrt{b^2 - 4ac}} over {2a}
 
 ### 4.5 그리스 문자
 
-| 종류 | 스크립트 |
-|---|---|
+| 종류   | 스크립트                                                                                                                      |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | 소문자 | `alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau upsilon phi chi psi omega` |
-| 대문자 | `Alpha Beta Gamma Delta ... Omega` (첫 글자만 대문자) |
-| 변형 | `vartheta varpi varsigma varupsilon varphi varepsilon` |
-| 특수 | `aleph hbar imath jmath ohm ell liter wp imag angstrom` |
+| 대문자 | `Alpha Beta Gamma Delta ... Omega` (첫 글자만 대문자)                                                                         |
+| 변형   | `vartheta varpi varsigma varupsilon varphi varepsilon`                                                                        |
+| 특수   | `aleph hbar imath jmath ohm ell liter wp imag angstrom`                                                                       |
 
 ### 4.6 화살표
 
@@ -193,12 +192,12 @@ x = {-b +- sqrt{b^2 - 4ac}} over {2a}
 
 ### 4.10 글꼴 명령과 기본 함수
 
-| 명령 | 효과 |
-|---|---|
-| `rm` | 이후 입력을 로만체로 |
-| `it` | 다시 이탤릭체로 |
-| `bold` | 볼드체 |
-| `rmbold` | 로만체 볼드 |
+| 명령     | 효과                 |
+| -------- | -------------------- |
+| `rm`     | 이후 입력을 로만체로 |
+| `it`     | 다시 이탤릭체로      |
+| `bold`   | 볼드체               |
+| `rmbold` | 로만체 볼드          |
 
 **자동으로 로만체가 되는 기본 함수·예약어:**
 
@@ -273,9 +272,9 @@ A inter B = { x | x in A ~and~ x in B }
 
 ## 7. 참고 자료
 
-- 한컴 도움말 -- [수식 명령어 목록](https://help.hancom.com/hoffice/multi/ko_kr/hwp/insert/equation/equation(script).htm)
-- 한컴 도움말 -- [수식 명령어 설명](https://help.hancom.com/hoffice/multi/ko_kr/hwp/insert/equation/equation(explanation).htm)
-- 한컴 도움말 -- [수식 글꼴과 기본 함수](https://help.hancom.com/hoffice/multi/ko_kr/hwp/insert/equation/equation(font).htm)
+- 한컴 도움말 -- [수식 명령어 목록](<https://help.hancom.com/hoffice/multi/ko_kr/hwp/insert/equation/equation(script).htm>)
+- 한컴 도움말 -- [수식 명령어 설명](<https://help.hancom.com/hoffice/multi/ko_kr/hwp/insert/equation/equation(explanation).htm>)
+- 한컴 도움말 -- [수식 글꼴과 기본 함수](<https://help.hancom.com/hoffice/multi/ko_kr/hwp/insert/equation/equation(font).htm>)
 - 한컴 공개 문서 -- [한글 문서 파일 형식: 수식 revision 1.3 (PDF)](https://cdn.hancom.com/link/docs/%ED%95%9C%EA%B8%80%EB%AC%B8%EC%84%9C%ED%8C%8C%EC%9D%BC%ED%98%95%EC%8B%9D_%EC%88%98%EC%8B%9D_revision1.3.pdf)
 - SASA Math -- [한컴오피스 한글로 수식이 삽입된 문서 작성하는 방법](https://sasamath.com/blog/tip-collection/how-to-write-equations-in-hwp/)
 - 커뮤니티 팁 -- [아래한글 수식입력 정리 (한스디 카페)](https://m.cafe.daum.net/hwp-script-db/bVJe/31)
