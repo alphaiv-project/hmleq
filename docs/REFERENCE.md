@@ -1,15 +1,15 @@
-# 한컴오피스 한글 수식 스크립트 — 공식 레퍼런스 위키
+# 한컴오피스 한글 수식 스크립트 -- 공식 레퍼런스 위키
 
 > 한컴오피스 한글(HWP/HWPX) 수식 편집기의 **스크립트 입력 언어**를 정리한 문서입니다.
 > 근거 자료: 한컴 공식 도움말(수식 명령어 목록/설명, 수식 글꼴과 기본 함수), 한컴 공개 문서
-> 「한글 문서 파일 형식 — 수식 (revision 1.3)」, 및 커뮤니티 실사용 팁.
+> 「한글 문서 파일 형식 -- 수식 (revision 1.3)」, 및 커뮤니티 실사용 팁.
 
 ---
 
 ## 목차
 
 1. [개요](#1-개요)
-2. [토큰(항) 구분 규칙 — 문법의 핵심](#2-토큰항-구분-규칙--문법의-핵심)
+2. [토큰(항) 구분 규칙 -- 문법의 핵심](#2-토큰항-구분-규칙--문법의-핵심)
 3. [키워드 매칭 방식: non-prefix인가, 최장 접두사 매칭인가?](#3-키워드-매칭-방식-non-prefix인가-최장-접두사-매칭인가)
 4. [명령어 레퍼런스](#4-명령어-레퍼런스)
 5. [수식 예시 모음](#5-수식-예시-모음)
@@ -34,7 +34,7 @@ x = {-b +- sqrt{b^2 - 4ac}} over {2a}
 
 ---
 
-## 2. 토큰(항) 구분 규칙 — 문법의 핵심
+## 2. 토큰(항) 구분 규칙 -- 문법의 핵심
 
 수식 스크립트는 먼저 **항(token) 단위로 잘라 읽는다.** 항을 구분하는 요소는 다음과 같다.
 
@@ -86,12 +86,12 @@ x = {-b +- sqrt{b^2 - 4ac}} over {2a}
 
 그래서:
 
-- `sinh` → 낱말 전체 "sinh"가 표에 있으므로 **sinh 하나로 인식**된다. `sin` + `h`로 쪼개지지
-  않는다. (접두사 충돌이 토큰 단위에서 자연히 해소됨 — 결과만 보면 "항상 가장 긴 해석이
+- `sinh` -> 낱말 전체 "sinh"가 표에 있으므로 **sinh 하나로 인식**된다. `sin` + `h`로 쪼개지지
+  않는다. (접두사 충돌이 토큰 단위에서 자연히 해소됨 -- 결과만 보면 "항상 가장 긴 해석이
   이긴다"처럼 보이는 이유)
-- `pile` → **pile 명령**이지 `pi` + `le`가 아니다. π 뒤에 le를 쓰고 싶으면 `pi le` 또는
+- `pile` -> **pile 명령**이지 `pi` + `le`가 아니다. π 뒤에 le를 쓰고 싶으면 `pi le` 또는
   `pi{le}`처럼 끊어야 한다.
-- 반대로 `sinx` → "sinx"라는 낱말은 표에 없으므로 **sin 함수로 인식되지 않고** 이탤릭
+- 반대로 `sinx` -> "sinx"라는 낱말은 표에 없으므로 **sin 함수로 인식되지 않고** 이탤릭
   *sinx*가 된다. sin x를 원하면 `sin x`로 띄어야 한다.
 - 같은 원리로, 함수를 일부러 이탤릭으로 쓰고 싶으면 `s in`, `si n`처럼 낱말을 깨면 된다고
   공식 파일 형식 문서가 안내한다. (단, `in`은 ∈ 기호 키워드이기도 하므로 실제로는 `si n`
@@ -101,9 +101,9 @@ x = {-b +- sqrt{b^2 - 4ac}} over {2a}
 
 | 가설 | 판정 |
 |---|---|
-| 키워드들이 서로 non-prefix(접두사 없는 집합)이다 | ❌ — `in`/`int`, `pi`/`pile` 등 접두사 쌍이 다수 존재 |
-| 문자 단위 최장 접두사(greedy) 매칭이다 | ❌ — `sinx`가 `sin`+`x`로 분해되지 않음 |
-| **구분자로 낱말을 자른 뒤 낱말 전체를 정확 일치로 조회** | ✅ — 접두사 모호성은 토큰 경계에서 해소 |
+| 키워드들이 서로 non-prefix(접두사 없는 집합)이다 | ❌ -- `in`/`int`, `pi`/`pile` 등 접두사 쌍이 다수 존재 |
+| 문자 단위 최장 접두사(greedy) 매칭이다 | ❌ -- `sinx`가 `sin`+`x`로 분해되지 않음 |
+| **구분자로 낱말을 자른 뒤 낱말 전체를 정확 일치로 조회** | ✅ -- 접두사 모호성은 토큰 경계에서 해소 |
 
 > 참고: 공식 파일 형식 문서(rev 1.3)도 형식적 어휘분석 규칙(정규문법)을 명시하지는 않는다.
 > 위 동작은 문서의 토큰 구분 규칙 + 편집기의 실제 동작(커뮤니티에서 널리 검증된 사례)에
@@ -123,16 +123,16 @@ x = {-b +- sqrt{b^2 - 4ac}} over {2a}
 | `root n of {A}` | n제곱근 | `root 3 of {x+1}` |
 | `A ^ {B}` (또는 `sup`) | 위첨자 | `E = mc^2` |
 | `A _ {B}` (또는 `sub`) | 아래첨자 | `H_2 O` |
-| `LEFT ( … RIGHT )` | 내용 크기에 맞게 늘어나는 괄호 | `LEFT( x over y RIGHT)` |
+| `LEFT ( ... RIGHT )` | 내용 크기에 맞게 늘어나는 괄호 | `LEFT( x over y RIGHT)` |
 | `bigg` | 기호 크기 확대 | `{a+b} over {a-b} bigg / {x+y}` |
-| `not` | 뒤 기호에 부정 사선 | `not =` → ≠ |
+| `not` | 뒤 기호에 부정 사선 | `not =` -> ≠ |
 
 ### 4.2 대형 연산자 (극한·합·적분·집합)
 
 | 스크립트 | 결과 |
 |---|---|
-| `lim` / `Lim` | 극한 (아래 첨자 위치가 다름 — 대소문자 구분 필수) |
-| `sum` | ∑ — `sum_{k=1}^{n}` |
+| `lim` / `Lim` | 극한 (아래 첨자 위치가 다름 -- 대소문자 구분 필수) |
+| `sum` | ∑ -- `sum_{k=1}^{n}` |
 | `prod` | ∏ |
 | `int`, `oint` | ∫, ∮ |
 | `dint`, `tint`, `odint`, `otint` | ∬, ∭, ∯, ∰ |
@@ -144,12 +144,12 @@ x = {-b +- sqrt{b^2 - 4ac}} over {2a}
 | 스크립트 | 결과 |
 |---|---|
 | `matrix { a & b # c & d }` | 괄호 없는 행렬 (`&` 열 구분, `#` 행 구분) |
-| `pmatrix { … }` | ( ) 행렬 |
-| `bmatrix { … }` | [ ] 행렬 |
-| `dmatrix { … }` | \| \| 행렬(행렬식) |
-| `cases { … # … }` | 경우 나누기 (왼쪽 `{`) |
-| `pile { … # … }` / `lpile` / `rpile` | 세로 쌓기 (가운데/왼쪽/오른쪽 정렬) |
-| `eqalign { … & … # … }` | `&` 기준 여러 줄 세로 맞춤 |
+| `pmatrix { ... }` | ( ) 행렬 |
+| `bmatrix { ... }` | [ ] 행렬 |
+| `dmatrix { ... }` | \| \| 행렬(행렬식) |
+| `cases { ... # ... }` | 경우 나누기 (왼쪽 `{`) |
+| `pile { ... # ... }` / `lpile` / `rpile` | 세로 쌓기 (가운데/왼쪽/오른쪽 정렬) |
+| `eqalign { ... & ... # ... }` | `&` 기준 여러 줄 세로 맞춤 |
 | `n choose k`, `binom {n}{k}` | 조합 기호 |
 | `rel`, `buildrel` | 화살표 위·아래에 관계식 얹기 |
 
@@ -164,13 +164,13 @@ x = {-b +- sqrt{b^2 - 4ac}} over {2a}
 | 종류 | 스크립트 |
 |---|---|
 | 소문자 | `alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau upsilon phi chi psi omega` |
-| 대문자 | `Alpha Beta Gamma Delta … Omega` (첫 글자만 대문자) |
+| 대문자 | `Alpha Beta Gamma Delta ... Omega` (첫 글자만 대문자) |
 | 변형 | `vartheta varpi varsigma varupsilon varphi varepsilon` |
 | 특수 | `aleph hbar imath jmath ohm ell liter wp imag angstrom` |
 
 ### 4.6 화살표
 
-`larrow`(←), `rarrow`(→), `uparrow`, `downarrow`, `lrarrow`(↔), `udarrow`,
+`larrow`(<-), `rarrow`(->), `uparrow`, `downarrow`, `lrarrow`(↔), `udarrow`,
 대문자형 `LARROW`(⇐), `RARROW`(⇒), `LRARROW`(⇔), `UDARROW`,
 대각선 `nwarrow nearrow swarrow searrow`, 기타 `hookleft hookright mapsto`
 (`leftarrow`, `rightarrow`, `Rightarrow` 같은 긴 이름도 인식된다.)
@@ -258,7 +258,7 @@ A inter B = { x | x in A ~and~ x in B }
 - **`sinx`는 sin x가 아니다.** 낱말 전체가 키워드와 일치해야 하므로 반드시 `sin x`로 띄어
   쓴다. (§3 참조)
 - **`pile`은 π+le가 아니라 쌓기 명령이다.** π 뒤에 문자를 붙이려면 `pi le`처럼 끊는다.
-- **9자 이상 낱말은 `"…"`로 묶어야** 하나의 낱말로 처리된다.
+- **9자 이상 낱말은 `"..."`로 묶어야** 하나의 낱말로 처리된다.
 - `lim`/`Lim`처럼 **대소문자가 의미를 바꾸는 예외**가 있다 (도움말에 첫 글자 대문자로 표기된
   명령은 그대로 입력).
 - 첨자 `^`, `_`는 **바로 뒤 한 항**에만 걸린다. `a^2 2`는 2만 위첨자가 되고 그다음 2는 본문
@@ -273,10 +273,10 @@ A inter B = { x | x in A ~and~ x in B }
 
 ## 7. 참고 자료
 
-- 한컴 도움말 — [수식 명령어 목록](https://help.hancom.com/hoffice/multi/ko_kr/hwp/insert/equation/equation(script).htm)
-- 한컴 도움말 — [수식 명령어 설명](https://help.hancom.com/hoffice/multi/ko_kr/hwp/insert/equation/equation(explanation).htm)
-- 한컴 도움말 — [수식 글꼴과 기본 함수](https://help.hancom.com/hoffice/multi/ko_kr/hwp/insert/equation/equation(font).htm)
-- 한컴 공개 문서 — [한글 문서 파일 형식: 수식 revision 1.3 (PDF)](https://cdn.hancom.com/link/docs/%ED%95%9C%EA%B8%80%EB%AC%B8%EC%84%9C%ED%8C%8C%EC%9D%BC%ED%98%95%EC%8B%9D_%EC%88%98%EC%8B%9D_revision1.3.pdf)
-- SASA Math — [한컴오피스 한글로 수식이 삽입된 문서 작성하는 방법](https://sasamath.com/blog/tip-collection/how-to-write-equations-in-hwp/)
-- 커뮤니티 팁 — [아래한글 수식입력 정리 (한스디 카페)](https://m.cafe.daum.net/hwp-script-db/bVJe/31)
-- 참고 구현 — [hml-equation-parser (HWP 수식 → LaTeX 변환기)](https://github.com/OpenBapul/hml-equation-parser)
+- 한컴 도움말 -- [수식 명령어 목록](https://help.hancom.com/hoffice/multi/ko_kr/hwp/insert/equation/equation(script).htm)
+- 한컴 도움말 -- [수식 명령어 설명](https://help.hancom.com/hoffice/multi/ko_kr/hwp/insert/equation/equation(explanation).htm)
+- 한컴 도움말 -- [수식 글꼴과 기본 함수](https://help.hancom.com/hoffice/multi/ko_kr/hwp/insert/equation/equation(font).htm)
+- 한컴 공개 문서 -- [한글 문서 파일 형식: 수식 revision 1.3 (PDF)](https://cdn.hancom.com/link/docs/%ED%95%9C%EA%B8%80%EB%AC%B8%EC%84%9C%ED%8C%8C%EC%9D%BC%ED%98%95%EC%8B%9D_%EC%88%98%EC%8B%9D_revision1.3.pdf)
+- SASA Math -- [한컴오피스 한글로 수식이 삽입된 문서 작성하는 방법](https://sasamath.com/blog/tip-collection/how-to-write-equations-in-hwp/)
+- 커뮤니티 팁 -- [아래한글 수식입력 정리 (한스디 카페)](https://m.cafe.daum.net/hwp-script-db/bVJe/31)
+- 참고 구현 -- [hml-equation-parser (HWP 수식 -> LaTeX 변환기)](https://github.com/OpenBapul/hml-equation-parser)
