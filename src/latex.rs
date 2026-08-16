@@ -1,14 +1,14 @@
-//! LaTeX emitter. Exact output templates: docs/DESIGN.md §5.
+//! LaTeX emitter.
 
 use crate::ast::{Node, SpaceKind};
 use crate::symbols::{MatrixKind, ScriptPos, StyleKind, SymDef, SymKind};
 
 /// Render an AST as LaTeX, following the canonical templates in DESIGN.md §5
-/// (Row children joined with single spaces, macro arguments always braced, …).
+/// (Row children joined with single spaces, macro arguments always braced, ...).
 pub fn to_latex(node: &Node) -> String {
     let body = emit(node);
     // Multi-line wrapping is a property of the whole equation, so it is decided
-    // here and never inside `emit` — DESIGN.md §5 "top level only". Only the
+    // here and never inside `emit` -- DESIGN.md §5 "top level only". Only the
     // root Row's *direct* children count.
     if let Node::Row(items) = node {
         if items.iter().any(|n| matches!(n, Node::Newline)) {
@@ -24,7 +24,7 @@ pub fn to_latex(node: &Node) -> String {
 }
 
 /// LaTeX for a `LEFT`/`RIGHT` delimiter as written in the script. `None` marks
-/// a delimiter the language does not accept (DESIGN.md §5 — the parser
+/// a delimiter the language does not accept (DESIGN.md §5 -- the parser
 /// validates `LEFT`/`RIGHT` arguments against this same map).
 pub fn delimiter_latex(raw: &str) -> Option<&'static str> {
     Some(match raw {
@@ -113,7 +113,7 @@ fn emit(node: &Node) -> String {
     }
 }
 
-/// A delimiter as written → its LaTeX. Unrecognized text cannot reach here
+/// A delimiter as written -> its LaTeX. Unrecognized text cannot reach here
 /// (the parser rejects it against the same map), so it passes through.
 fn delim(raw: &str) -> String {
     match delimiter_latex(raw) {
@@ -123,7 +123,7 @@ fn delim(raw: &str) -> String {
 }
 
 /// A big operator carrying no scripts shrinks to its binary form
-/// (`A union B` → `A \cup B`); `emit_script_base` bypasses this.
+/// (`A union B` -> `A \cup B`); `emit_script_base` bypasses this.
 fn emit_symbol(d: &SymDef) -> String {
     match (d.kind, d.bin_latex) {
         (SymKind::BigOp, Some(bin)) => bin.to_string(),
@@ -187,8 +187,8 @@ fn op_ligature(raw: &str) -> Option<&'static str> {
     })
 }
 
-/// Escape the TeX specials inside `\text{…}`. `\`, `~` and `^` have no
-/// `\<char>` form, so they use their `\text…{}` macros.
+/// Escape the TeX specials inside `\text{...}`. `\`, `~` and `^` have no
+/// `\<char>` form, so they use their `\text...{}` macros.
 fn escape_text(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     for ch in s.chars() {
@@ -272,7 +272,7 @@ mod tests {
         assert_eq!(to_latex(&Node::Symbol(&LIM_EXACT)), r"\lim");
     }
 
-    /// Script bases are bare — only a Row of ≥ 2 items needs braces.
+    /// Script bases are bare -- only a Row of ≥ 2 items needs braces.
     #[test]
     fn row_script_base_is_braced() {
         let row = script(
@@ -375,7 +375,7 @@ mod tests {
             to_latex(&n),
             r"\begin{pmatrix} a_{1} & b_{1} \\ a_{2} & b_{2} \end{pmatrix}"
         );
-        // dmatrix → vmatrix, eqalign → aligned.
+        // dmatrix -> vmatrix, eqalign -> aligned.
         let one = |k| Node::Matrix {
             kind: k,
             rows: vec![vec![ident("a")]],
@@ -413,7 +413,7 @@ mod tests {
             r"\begin{aligned} a & b \\ c & d \end{aligned}"
         );
 
-        // No Newline at top level → no wrapper, even with an Align.
+        // No Newline at top level -> no wrapper, even with an Align.
         let flat = Node::Row(vec![ident("a"), Node::Align, ident("b")]);
         assert_eq!(to_latex(&flat), "a & b");
 
@@ -442,7 +442,7 @@ mod tests {
         ] {
             assert_eq!(to_latex(&op(raw)), tex);
         }
-        // Non-ligature operators are verbatim — a bare `|` stays a pipe.
+        // Non-ligature operators are verbatim -- a bare `|` stays a pipe.
         for raw in ["+", "-", "=", "(", "|", "/", "<"] {
             assert_eq!(to_latex(&op(raw)), raw);
         }
@@ -480,7 +480,7 @@ mod tests {
             base: Box::new(ident("A")),
         };
         assert_eq!(to_latex(&accent), r"\vec{A}");
-        // `vec A^2` — the accent is the script base, and it is not a Row.
+        // `vec A^2` -- the accent is the script base, and it is not a Row.
         assert_eq!(
             to_latex(&script(accent, None, Some(num("2")))),
             r"\vec{A}^{2}"

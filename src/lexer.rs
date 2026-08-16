@@ -1,4 +1,4 @@
-//! Tokenizer for the HWP equation script. Rules: docs/DESIGN.md §1.
+//! Tokenizer for the HWP equation script.
 
 use crate::error::ParseError;
 use crate::token::{Token, TokenKind};
@@ -10,7 +10,7 @@ use crate::token::{Token, TokenKind};
 const LIGATURES: [&str; 8] = ["+-", "-+", "!=", "<=", ">=", "<<", ">>", "||"];
 
 /// Word characters: ASCII letters plus any non-ASCII alphabetic scalar.
-/// Within ASCII `char::is_alphabetic` is exactly `A–Z a–z`, so this is
+/// Within ASCII `char::is_alphabetic` is exactly `A-Z a-z`, so this is
 /// DESIGN.md §1.4 verbatim. Digits are never word characters, so `x2` lexes
 /// as `Word("x") Number("2")`.
 fn is_word_char(c: char) -> bool {
@@ -58,7 +58,7 @@ pub fn lex(src: &str) -> Result<Vec<Token>, ParseError> {
             continue;
         }
 
-        // 3. Quoted text — no escape processing (HWP has none), so the first
+        // 3. Quoted text -- no escape processing (HWP has none), so the first
         // `"` after the opener closes it.
         if c == '"' {
             let body = i + 1;
@@ -76,7 +76,7 @@ pub fn lex(src: &str) -> Result<Vec<Token>, ParseError> {
             continue;
         }
 
-        // 4. Maximal alphabetic run → one Word. Keyword lookup happens later,
+        // 4. Maximal alphabetic run -> one Word. Keyword lookup happens later,
         // on the whole word: `sinh` and `sinx` are each a single Word.
         if is_word_char(c) {
             let start = i;
@@ -284,7 +284,7 @@ mod tests {
     #[test]
     fn words_are_maximal_runs() {
         // REFERENCE.md §3: keyword resolution is whole-word, so the lexer must
-        // not split these — `sinh` is not `sin`+`h`, `sinx` is not `sin`+`x`.
+        // not split these -- `sinh` is not `sin`+`h`, `sinx` is not `sin`+`x`.
         assert_eq!(kinds("sinh"), vec![word("sinh")]);
         assert_eq!(kinds("sinx"), vec![word("sinx")]);
         assert_eq!(kinds("sinh x"), vec![word("sinh"), word("x")]);

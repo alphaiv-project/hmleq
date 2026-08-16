@@ -1,4 +1,4 @@
-//! Token types produced by the lexer. See `docs/DESIGN.md` §1 for the rules.
+//! Token types produced by the lexer.
 
 /// A token with its byte span in the source.
 #[derive(Debug, Clone, PartialEq)]

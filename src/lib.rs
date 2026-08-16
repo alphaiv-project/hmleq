@@ -1,9 +1,7 @@
-//! hmleq — parser for the Hancom HWP(한글) equation script language.
+//! hmleq -- parser for the Hancom HWP(한글) equation script language.
 //!
 //! The language is the script syntax of the HWP equation editor
-//! (`x = {-b +- sqrt{b^2 - 4ac}} over {2a}` and friends). See
-//! `docs/REFERENCE.md` for the language and `docs/DESIGN.md` for the
-//! architecture and the exact output mappings.
+//! (`x = {-b +- sqrt{b^2 - 4ac}} over {2a}` and friends).
 //!
 //! The primary product is the [`Node`] AST:
 //!
@@ -14,12 +12,12 @@
 //!
 //! # Features
 //!
-//! - `latex` *(default)* — the [`latex`] module plus [`to_latex`] /
+//! - `latex` *(default)* -- the [`latex`] module plus [`to_latex`] /
 //!   [`eq_to_latex`] and the `hmleq` CLI.
-//! - `serde` — `Serialize`/`Deserialize` on the whole AST. Symbols serialize
+//! - `serde` -- `Serialize`/`Deserialize` on the whole AST. Symbols serialize
 //!   as their canonical keyword name and are resolved back through the
 //!   keyword table on deserialization, so trees round-trip.
-//! - `json` — `--json` output in the CLI (implies `serde`).
+//! - `json` -- `--json` output in the CLI (implies `serde`).
 
 pub mod ast;
 pub mod error;

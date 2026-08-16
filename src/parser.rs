@@ -1,5 +1,4 @@
 //! Recursive-descent parser for the HWP equation script.
-//! Grammar and binding rules: docs/DESIGN.md §3.
 
 use crate::ast::{Node, SpaceKind};
 use crate::error::ParseError;
@@ -25,16 +24,16 @@ pub fn parse(src: &str) -> Result<Node, ParseError> {
 
 /// What terminates the sequence currently being parsed. Every variant also
 /// stops at EOF; whether that is legal is decided by the caller, which knows
-/// what it opened (`unclosed '{'`, `LEFT without RIGHT`, …).
+/// what it opened (`unclosed '{'`, `LEFT without RIGHT`, ...).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Stop {
-    /// Top level — only EOF ends it.
+    /// Top level -- only EOF ends it.
     Eof,
-    /// `}` — a braced group.
+    /// `}` -- a braced group.
     Brace,
-    /// The `RIGHT` keyword — a `LEFT … RIGHT` body.
+    /// The `RIGHT` keyword -- a `LEFT ... RIGHT` body.
     Right,
-    /// `}`, `#` or `&` — one matrix cell. Row/column splitting is depth-local,
+    /// `}`, `#` or `&` -- one matrix cell. Row/column splitting is depth-local,
     /// so nested groups and matrices are parsed with their own `Stop`.
     Cell,
 }
@@ -77,7 +76,7 @@ impl Parser {
         self.tokens.get(self.pos)
     }
 
-    /// Byte offset of the token about to be read (EOF → end of source).
+    /// Byte offset of the token about to be read (EOF -> end of source).
     fn here(&self) -> usize {
         self.peek().map_or(self.src_len, |t| t.start)
     }
@@ -213,13 +212,13 @@ impl Parser {
         }
     }
 
-    /// A mandatory scripted-term operand (`sqrt`, `not`, `root`, `binom`, …).
+    /// A mandatory scripted-term operand (`sqrt`, `not`, `root`, `binom`, ...).
     fn operand(&mut self, stop: Stop, what: &str) -> Result<Node, ParseError> {
         self.require(stop, what)?;
         self.scripted(stop)
     }
 
-    /// A mandatory prefixed-primary operand — accents, `big`, and script
+    /// A mandatory prefixed-primary operand -- accents, `big`, and script
     /// arguments bind tighter than scripts do.
     fn operand_primary(&mut self, stop: Stop, what: &str) -> Result<Node, ParseError> {
         self.require(stop, what)?;
@@ -275,7 +274,7 @@ impl Parser {
                 })
             }
             Some(Keyword::Sym(d)) => Ok(Node::Symbol(d)),
-            // `of` is a keyword only inside `root … of …`, which consumes it
+            // `of` is a keyword only inside `root ... of ...`, which consumes it
             // itself; anywhere else it is an ordinary word.
             Some(Keyword::Cmd(Cmd::Of)) => Ok(Node::Ident(w.to_string())),
             Some(Keyword::Cmd(cmd)) => self.command(cmd, w, at, stop),
@@ -363,7 +362,7 @@ impl Parser {
         }
     }
 
-    /// `matrix { a & b # c & d }` — `#` and `&` split at THIS depth only;
+    /// `matrix { a & b # c & d }` -- `#` and `&` split at THIS depth only;
     /// nested groups and matrices keep their own separators.
     fn matrix(&mut self, kind: MatrixKind, name: &str) -> Result<Node, ParseError> {
         if !matches!(self.peek().map(|t| &t.kind), Some(TokenKind::LBrace)) {
@@ -450,7 +449,7 @@ mod tests {
         Box::new(n)
     }
 
-    /// `a over b over c` = `(a/b)/c` — the infix operator pops the item that is
+    /// `a over b over c` = `(a/b)/c` -- the infix operator pops the item that is
     /// already in the sequence, so it is left-associative.
     #[test]
     fn over_is_left_associative() {

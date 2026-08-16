@@ -1,12 +1,12 @@
 //! Keyword tables for the HWP equation script.
 //!
-//! Lookup contract (docs/DESIGN.md §2): whole-word matching only — the parser
+//! Lookup contract: whole-word matching only -- the parser
 //! hands `lookup` a complete word cut at token boundaries; it is NEVER called
 //! on a prefix. Resolution order: exact case-sensitive table first, then the
 //! case-insensitive table keyed by the ASCII-lowercased word. `None` means the
 //! word is an ordinary italic identifier.
 
-/// How sub/superscripts attach to a symbol (docs/DESIGN.md §5).
+/// How sub/superscripts attach to a symbol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ScriptPos {
     /// Like any ordinary term (`\int`, `\sin`, plain letters).
@@ -20,30 +20,30 @@ pub enum ScriptPos {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SymKind {
-    /// Ordinary symbol (Greek letters, ∞, ∂, ′, …).
+    /// Ordinary symbol (Greek letters, ∞, ∂, ′, ...).
     Ord,
-    /// Binary operator (×, ·, ±, …).
+    /// Binary operator (×, ·, ±, ...).
     Bin,
-    /// Relation (≤, ∈, ≐, …).
+    /// Relation (≤, ∈, ≐, ...).
     Rel,
-    /// Large operator (∑, ∫, ⋃, …).
+    /// Large operator (∑, ∫, ⋃, ...).
     BigOp,
-    /// Upright function name (sin, log, lim, …).
+    /// Upright function name (sin, log, lim, ...).
     Func,
-    /// Accent / decoration (vec, hat, …) — consumes the following term.
+    /// Accent / decoration (vec, hat, ...) -- consumes the following term.
     Accent,
 }
 
 /// One keyword symbol.
 #[derive(Debug, PartialEq, Eq)]
 pub struct SymDef {
-    /// Canonical name as documented in docs/REFERENCE.md.
+    /// Canonical keyword name.
     pub name: &'static str,
     pub kind: SymKind,
     /// Primary LaTeX. For `Accent` this is a one-argument macro (`\vec`).
     pub latex: &'static str,
     /// `BigOp` only: LaTeX emitted when the operator carries no scripts
-    /// (`union` → `\cup` vs `\bigcup`). `None` elsewhere.
+    /// (`union` -> `\cup` vs `\bigcup`). `None` elsewhere.
     pub bin_latex: Option<&'static str>,
     pub scripts: ScriptPos,
 }
@@ -51,21 +51,21 @@ pub struct SymDef {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MatrixKind {
-    /// `matrix` — no fences.
+    /// `matrix` -- no fences.
     Plain,
-    /// `pmatrix` — parentheses.
+    /// `pmatrix` -- parentheses.
     Paren,
-    /// `bmatrix` — square brackets.
+    /// `bmatrix` -- square brackets.
     Bracket,
-    /// `dmatrix` — vertical bars (determinant).
+    /// `dmatrix` -- vertical bars (determinant).
     Det,
-    /// `cases` — left brace only.
+    /// `cases` -- left brace only.
     Cases,
-    /// `pile` / `lpile` / `rpile` — vertical stack (centre/left/right).
+    /// `pile` / `lpile` / `rpile` -- vertical stack (centre/left/right).
     Pile,
     LPile,
     RPile,
-    /// `eqalign` — multi-line alignment on `&`.
+    /// `eqalign` -- multi-line alignment on `&`.
     EqAlign,
 }
 
@@ -91,7 +91,7 @@ pub enum Cmd {
     Binom,
     Sqrt,
     Root,
-    /// `of` — only meaningful inside a `root … of …` form; the parser treats
+    /// `of` -- only meaningful inside a `root ... of ...` form; the parser treats
     /// it as an identifier elsewhere.
     Of,
     Left,
@@ -101,12 +101,12 @@ pub enum Cmd {
     Not,
     /// `buildrel` (and its alias `rel`).
     BuildRel,
-    /// `big`/`Big`/`bigg`/`Bigg` — payload is the LaTeX size command
+    /// `big`/`Big`/`bigg`/`Bigg` -- payload is the LaTeX size command
     /// (`"\\big"`, `"\\Big"`, `"\\bigg"`, `"\\Bigg"`).
     Big(&'static str),
-    /// `sup` keyword — same as `^`.
+    /// `sup` keyword -- same as `^`.
     Sup,
-    /// `sub` keyword — same as `_`.
+    /// `sub` keyword -- same as `_`.
     Sub,
 }
 
@@ -148,11 +148,11 @@ const fn rel(name: &'static str, latex: &'static str) -> SymDef {
 const fn accent(name: &'static str, latex: &'static str) -> SymDef {
     def(name, SymKind::Accent, latex, None, ScriptPos::Normal)
 }
-/// Ordinary function name — scripts attach as they do on any other term.
+/// Ordinary function name -- scripts attach as they do on any other term.
 const fn func(name: &'static str, latex: &'static str) -> SymDef {
     def(name, SymKind::Func, latex, None, ScriptPos::Normal)
 }
-/// Function name that takes limits under/over it (`lim`, `max`, …).
+/// Function name that takes limits under/over it (`lim`, `max`, ...).
 const fn func_below(name: &'static str, latex: &'static str) -> SymDef {
     def(name, SymKind::Func, latex, None, ScriptPos::Below)
 }
@@ -165,7 +165,7 @@ const fn bigop(name: &'static str, latex: &'static str, scripts: ScriptPos) -> S
     def(name, SymKind::BigOp, latex, None, scripts)
 }
 /// Large operator that shrinks to `bin_form` when it carries no scripts
-/// (`union` → `\bigcup` with limits, `\cup` bare).
+/// (`union` -> `\bigcup` with limits, `\cup` bare).
 const fn bigop_bin(
     name: &'static str,
     latex: &'static str,
@@ -176,7 +176,7 @@ const fn bigop_bin(
 }
 
 // ---------------------------------------------------------------------------
-// Exact (case-sensitive) table — DESIGN.md §2
+// Exact (case-sensitive) table -- DESIGN.md §2
 // ---------------------------------------------------------------------------
 
 /// Words whose capitalization changes their meaning. Every name here contains
@@ -233,7 +233,7 @@ fn exact_cmd(word: &str) -> Option<Cmd> {
 }
 
 // ---------------------------------------------------------------------------
-// Case-insensitive table — keyed by the ASCII-lowercased word
+// Case-insensitive table -- keyed by the ASCII-lowercased word
 // ---------------------------------------------------------------------------
 
 /// Every `name` here MUST be ASCII-lowercase (asserted in the unit tests):
@@ -254,7 +254,7 @@ static CI_SYMS: &[SymDef] = &[
     ord("mu", r"\mu"),
     ord("nu", r"\nu"),
     ord("xi", r"\xi"),
-    // no `\omicron` exists in TeX — it is just a roman `o`.
+    // no `\omicron` exists in TeX -- it is just a roman `o`.
     ord("omicron", "o"),
     ord("pi", r"\pi"),
     ord("rho", r"\rho"),
@@ -397,7 +397,7 @@ static CI_SYMS: &[SymDef] = &[
     func_below("min", r"\min"),
     func_below("det", r"\det"),
     func_below("gcd", r"\gcd"),
-    // -- accents (REFERENCE §4.4) — one-argument macros --------------------
+    // -- accents (REFERENCE §4.4) -- one-argument macros --------------------
     accent("acute", r"\acute"),
     accent("grave", r"\grave"),
     accent("dot", r"\dot"),
@@ -474,7 +474,7 @@ fn ci_lookup(lower: &str) -> Option<Keyword> {
 }
 
 /// Look up a complete word. Exact (case-sensitive) table first, then the
-/// case-insensitive table via ASCII lowercasing. `None` → italic identifier.
+/// case-insensitive table via ASCII lowercasing. `None` -> italic identifier.
 pub fn lookup(word: &str) -> Option<Keyword> {
     if let Some(cmd) = exact_cmd(word) {
         return Some(Keyword::Cmd(cmd));
@@ -519,7 +519,7 @@ mod tests {
         assert_eq!(cmd("OVER"), Cmd::Over);
     }
 
-    /// `big`/`bigg` are CI, `Big`/`Bigg` are exact — different sizes.
+    /// `big`/`bigg` are CI, `Big`/`Bigg` are exact -- different sizes.
     #[test]
     fn delimiter_sizes() {
         assert_eq!(cmd("big"), Cmd::Big(r"\big"));
@@ -585,7 +585,7 @@ mod tests {
         assert_eq!(sym("pi").latex, r"\pi");
         assert_eq!(sym("Omega").latex, r"\Omega");
         assert_eq!(sym("omega").latex, r"\omega");
-        // ALPHA is not exact → CI → lowercase alpha.
+        // ALPHA is not exact -> CI -> lowercase alpha.
         assert_eq!(sym("ALPHA").latex, r"\alpha");
     }
 
