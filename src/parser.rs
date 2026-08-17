@@ -65,8 +65,7 @@ fn infix_name(c: Cmd) -> &'static str {
     }
 }
 
-/// The delimiters DESIGN.md §5 maps for `\left`/`\right`; the same set
-/// validates `LEFT`/`RIGHT` here.
+/// The delimiters accepted after `left`/`right`.
 fn is_delimiter(s: &str) -> bool {
     matches!(s, "(" | ")" | "[" | "]" | "|" | "||" | "<" | ">" | ".")
 }
@@ -260,7 +259,7 @@ impl Parser {
         })
     }
 
-    /// Whole-word keyword dispatch (REFERENCE.md §3): the word arrives already
+    /// Whole-word keyword dispatch: the word arrives already
     /// cut at token boundaries, so `sinx` simply misses the table.
     fn word(&mut self, w: &str, at: usize, stop: Stop) -> Result<Node, ParseError> {
         match lookup(w) {
@@ -541,7 +540,7 @@ mod tests {
         );
     }
 
-    /// REFERENCE.md §3: whole-token lookup, never a prefix scan.
+    /// Whole-token lookup, never a prefix scan.
     #[test]
     fn whole_word_keyword_matching() {
         assert_eq!(p("pi le"), Node::Row(vec![sym("pi"), ident("le")]));

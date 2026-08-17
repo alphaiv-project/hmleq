@@ -174,17 +174,17 @@ const fn bigop_bin(
 }
 
 // ---------------------------------------------------------------------------
-// Exact (case-sensitive) table -- DESIGN.md §2
+// Exact (case-sensitive) table
 // ---------------------------------------------------------------------------
 
 /// Words whose capitalization changes their meaning. Every name here contains
 /// an uppercase letter, so an all-lowercase word can skip this table entirely.
 static EXACT_SYMS: &[SymDef] = &[
-    // -- functions distinguished by case (REFERENCE §4.10) ----------------
+    // -- functions distinguished by case ---------------------------------
     func_beside("Lim", r"\lim"),
     func("Exp", r"\operatorname{Exp}"),
     func_below("Pr", r"\Pr"),
-    // -- Greek capitals (REFERENCE §4.5) ----------------------------------
+    // -- Greek capitals --------------------------------------------------
     // Those whose shape is a Latin letter render as that plain letter.
     ord("Alpha", "A"),
     ord("Beta", "B"),
@@ -210,7 +210,7 @@ static EXACT_SYMS: &[SymDef] = &[
     ord("Chi", "X"),
     ord("Psi", r"\Psi"),
     ord("Omega", r"\Omega"),
-    // -- double arrows (REFERENCE §4.6) -----------------------------------
+    // -- double arrows ---------------------------------------------------
     rel("LARROW", r"\Leftarrow"),
     rel("RARROW", r"\Rightarrow"),
     rel("LRARROW", r"\Leftrightarrow"),
@@ -237,7 +237,7 @@ fn exact_cmd(word: &str) -> Option<Cmd> {
 /// Every `name` here MUST be ASCII-lowercase (asserted in the unit tests):
 /// lookup only ever probes this table with a lowercased word.
 static CI_SYMS: &[SymDef] = &[
-    // -- Greek lowercase (REFERENCE §4.5) ---------------------------------
+    // -- Greek lowercase -------------------------------------------------
     ord("alpha", r"\alpha"),
     ord("beta", r"\beta"),
     ord("gamma", r"\gamma"),
@@ -263,15 +263,15 @@ static CI_SYMS: &[SymDef] = &[
     ord("chi", r"\chi"),
     ord("psi", r"\psi"),
     ord("omega", r"\omega"),
-    // -- Greek variants ---------------------------------------------------
+    // -- Greek variants --------------------------------------------------
     ord("vartheta", r"\vartheta"),
     ord("varpi", r"\varpi"),
     ord("varsigma", r"\varsigma"),
-    // no lowercase variant upsilon exists; DESIGN.md §5 pins it to the capital.
+    // no lowercase variant upsilon exists; pinned to the capital form.
     ord("varupsilon", r"\Upsilon"),
     ord("varphi", r"\varphi"),
     ord("varepsilon", r"\varepsilon"),
-    // -- specials (REFERENCE §4.5) ----------------------------------------
+    // -- specials --------------------------------------------------------
     ord("aleph", r"\aleph"),
     ord("hbar", r"\hbar"),
     ord("imath", r"\imath"),
@@ -282,7 +282,7 @@ static CI_SYMS: &[SymDef] = &[
     ord("wp", r"\wp"),
     ord("imag", r"\Im"),
     ord("angstrom", r"\mathring{A}"),
-    // -- arrows (REFERENCE §4.6) ------------------------------------------
+    // -- arrows ----------------------------------------------------------
     rel("larrow", r"\leftarrow"),
     rel("rarrow", r"\rightarrow"),
     rel("uparrow", r"\uparrow"),
@@ -301,7 +301,7 @@ static CI_SYMS: &[SymDef] = &[
     rel("hookleft", r"\hookleftarrow"),
     rel("hookright", r"\hookrightarrow"),
     rel("mapsto", r"\mapsto"),
-    // -- relations (REFERENCE §4.7) ---------------------------------------
+    // -- relations -------------------------------------------------------
     rel("leq", r"\leq"),
     rel("geq", r"\geq"),
     rel("neq", r"\neq"),
@@ -313,7 +313,7 @@ static CI_SYMS: &[SymDef] = &[
     rel("equiv", r"\equiv"),
     rel("asymp", r"\asymp"),
     rel("identical", r"\equiv"),
-    // -- sets (REFERENCE §4.8) --------------------------------------------
+    // -- sets ------------------------------------------------------------
     rel("in", r"\in"),
     rel("owns", r"\ni"),
     rel("notin", r"\notin"),
@@ -322,7 +322,7 @@ static CI_SYMS: &[SymDef] = &[
     rel("subseteq", r"\subseteq"),
     rel("supseteq", r"\supseteq"),
     ord("emptyset", r"\emptyset"),
-    // -- misc symbols (REFERENCE §4.9) ------------------------------------
+    // -- misc symbols ----------------------------------------------------
     ord("inf", r"\infty"),
     ord("infty", r"\infty"),
     ord("partial", r"\partial"),
@@ -340,9 +340,9 @@ static CI_SYMS: &[SymDef] = &[
     ord("exist", r"\exists"),
     ord("prime", r"\prime"),
     bin("diamond", r"\diamond"),
-    // `deg` is listed both as a symbol (§4.9) and as a base function (§4.10);
-    // DESIGN.md §5 resolves it to the function form (see the Func block).
-    // -- big operators (REFERENCE §4.2) -----------------------------------
+    // `deg` is both a symbol and a base function; it resolves to the function
+    // form (see the Func block).
+    // -- big operators ---------------------------------------------------
     bigop("sum", r"\sum", ScriptPos::Below),
     bigop("prod", r"\prod", ScriptPos::Below),
     bigop("int", r"\int", ScriptPos::Normal),
@@ -361,7 +361,7 @@ static CI_SYMS: &[SymDef] = &[
     bigop("smalloint", r"\oint", ScriptPos::Beside),
     bigop("smallunion", r"\bigcup", ScriptPos::Beside),
     bigop("smallinter", r"\bigcap", ScriptPos::Beside),
-    // -- base functions (REFERENCE §4.10) ---------------------------------
+    // -- base functions --------------------------------------------------
     func("sin", r"\sin"),
     func("cos", r"\cos"),
     func("tan", r"\tan"),
@@ -395,7 +395,7 @@ static CI_SYMS: &[SymDef] = &[
     func_below("min", r"\min"),
     func_below("det", r"\det"),
     func_below("gcd", r"\gcd"),
-    // -- accents (REFERENCE §4.4) -- each consumes the following term -------
+    // -- accents -- each consumes the following term ---------------------
     accent("acute", r"\acute"),
     accent("grave", r"\grave"),
     accent("dot", r"\dot"),
@@ -413,7 +413,7 @@ static CI_SYMS: &[SymDef] = &[
 /// Case-insensitive commands, probed with the lowercased word.
 fn ci_cmd(word: &str) -> Option<Cmd> {
     Some(match word {
-        // structure (REFERENCE §4.1)
+        // structure
         "over" => Cmd::Over,
         "atop" => Cmd::Atop,
         "sqrt" => Cmd::Sqrt,
@@ -426,7 +426,7 @@ fn ci_cmd(word: &str) -> Option<Cmd> {
         "sub" => Cmd::Sub,
         "big" => Cmd::Big(r"\big"),
         "bigg" => Cmd::Big(r"\bigg"),
-        // combinations / stacking (REFERENCE §4.3)
+        // combinations / stacking
         "choose" => Cmd::Choose,
         "binom" => Cmd::Binom,
         "buildrel" | "rel" => Cmd::BuildRel,
@@ -439,7 +439,7 @@ fn ci_cmd(word: &str) -> Option<Cmd> {
         "lpile" => Cmd::Matrix(MatrixKind::LPile),
         "rpile" => Cmd::Matrix(MatrixKind::RPile),
         "eqalign" => Cmd::Matrix(MatrixKind::EqAlign),
-        // fonts (REFERENCE §4.10)
+        // fonts
         "rm" => Cmd::Style(StyleKind::Roman),
         "it" => Cmd::Style(StyleKind::Italic),
         "bold" => Cmd::Style(StyleKind::Bold),
@@ -506,7 +506,7 @@ mod tests {
         }
     }
 
-    /// DESIGN §2: commands live in the case-insensitive table.
+    /// Commands live in the case-insensitive table.
     #[test]
     fn commands_are_case_insensitive() {
         assert_eq!(cmd("SQRT"), Cmd::Sqrt);
@@ -587,7 +587,7 @@ mod tests {
         assert_eq!(sym("ALPHA").latex, r"\alpha");
     }
 
-    /// REFERENCE §3: whole-word match, so prefix pairs never collide.
+    /// Whole-word match, so prefix pairs never collide.
     #[test]
     fn whole_word_matching() {
         // pi / pile

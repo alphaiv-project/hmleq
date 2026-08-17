@@ -12,23 +12,23 @@ pub struct Token {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenKind {
-    /// `{` — begins an invisible group.
+    /// `{` -- begins an invisible group.
     LBrace,
     /// `}`
     RBrace,
-    /// `^` — superscript marker.
+    /// `^` -- superscript marker.
     Caret,
-    /// `_` — subscript marker.
+    /// `_` -- subscript marker.
     Underscore,
-    /// `#` — line break / matrix row separator.
+    /// `#` -- line break / matrix row separator.
     Hash,
-    /// `&` — alignment / matrix column separator.
+    /// `&` -- alignment / matrix column separator.
     Amp,
-    /// `~` — printed full-width space.
+    /// `~` -- printed full-width space.
     Tilde,
-    /// `` ` `` — printed quarter-width space.
+    /// `` ` `` -- printed quarter-width space.
     Backquote,
-    /// `"..."` — verbatim text (quotes stripped, no escape processing).
+    /// `"..."` -- verbatim text (quotes stripped, no escape processing).
     Quoted(String),
     /// Maximal run of alphabetic characters. Keyword lookup happens later,
     /// on the whole word (never on a prefix).
@@ -37,7 +37,7 @@ pub enum TokenKind {
     /// digits on both sides (e.g. `3.14`).
     Number(String),
     /// A single operator/punctuation character, or one of the multi-char
-    /// ligatures listed in DESIGN.md §1 (`+-`, `-+`, `!=`, `<=`, `>=`,
+    /// ligatures (`+-`, `-+`, `!=`, `<=`, `>=`,
     /// `<<`, `>>`, `||`).
     Op(String),
 }
