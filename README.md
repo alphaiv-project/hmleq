@@ -4,7 +4,7 @@
 수식 편집기 입력 언어)를 파싱해 **serde 직렬화 가능한 AST**로 만드는 Rust 크레이트입니다.
 LaTeX 변환기는 기본 피처로 함께 제공됩니다.
 
-- 언어 레퍼런스: [`docs/REFERENCE.md`](docs/REFERENCE.md) — 토큰 규칙, 키워드 매칭
+- 언어 레퍼런스: [`docs/REFERENCE.md`](docs/REFERENCE.md) -- 토큰 규칙, 키워드 매칭
   방식(구분자 기반 토큰화 + 낱말 전체 일치), 전체 명령어 목록
 - 구현 설계/출력 규약: [`docs/DESIGN.md`](docs/DESIGN.md)
 
@@ -12,9 +12,8 @@ LaTeX 변환기는 기본 피처로 함께 제공됩니다.
 
 | 피처 | 기본 | 내용 |
 |---|---|---|
-| `latex` | ✅ | `latex` 모듈, `to_latex` / `eq_to_latex`, CLI |
-| `serde` | — | AST 전체 `Serialize`/`Deserialize` (라운드트립 보장) |
-| `json` | — | CLI `--json` 출력 (`serde` 포함) |
+| `latex` | ✅ | `latex` 모듈, `to_latex` / `eq_to_latex` |
+| `serde` | -- | AST 전체 `Serialize`/`Deserialize` (라운드트립 보장) |
 
 파서/AST만 필요하면 `default-features = false`로 의존성 0개의 최소 빌드가 됩니다:
 
@@ -24,7 +23,7 @@ hmleq = { version = "0.2", default-features = false, features = ["serde"] }
 
 ## 사용법
 
-라이브러리 — AST가 일급 산출물입니다:
+라이브러리 -- AST가 일급 산출물입니다:
 
 ```rust
 let ast = hmleq::parse("1 over pi")?;
@@ -40,16 +39,16 @@ let latex = hmleq::eq_to_latex("sum _{n=1} ^{inf} {1 over n^2} = {pi^2} over 6")
 assert_eq!(latex, r"\sum_{n = 1}^{\infty} \frac{1}{n^{2}} = \frac{\pi^{2}}{6}");
 ```
 
-CLI:
+CLI (`cli/`의 `hmleq-cli` 크레이트, 바이너리 이름은 `hmleq`):
 
 ```console
-$ cargo run -q -- 'lim _{x rarrow 0} {sin x} over x = 1'
+$ cargo run -q -p hmleq-cli -- 'lim _{x rarrow 0} {sin x} over x = 1'
 \lim_{x \rightarrow 0} \frac{\sin x}{x} = 1
 
-$ cargo run -q --features json -- --json '1 over pi'
+$ cargo run -q -p hmleq-cli -- --json '1 over pi'
 {"Frac":{"num":{"Number":"1"},"den":{"Symbol":"pi"},"bar":true}}
 
-$ echo 'pmatrix { a & b # c & d }' | cargo run -q
+$ echo 'pmatrix { a & b # c & d }' | cargo run -q -p hmleq-cli
 \begin{pmatrix} a & b \\ c & d \end{pmatrix}
 ```
 
