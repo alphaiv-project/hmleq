@@ -3,13 +3,11 @@
 use crate::ast::{Node, SpaceKind};
 use crate::symbols::{MatrixKind, ScriptPos, StyleKind, SymDef, SymKind};
 
-/// Render an AST as LaTeX, following the canonical templates in DESIGN.md §5
-/// (Row children joined with single spaces, macro arguments always braced, ...).
+/// Render an AST as LaTeX, following the canonical templates.
 pub fn to_latex(node: &Node) -> String {
     let body = emit(node);
     // Multi-line wrapping is a property of the whole equation, so it is decided
-    // here and never inside `emit` -- DESIGN.md §5 "top level only". Only the
-    // root Row's *direct* children count.
+    // here and never inside `emit`
     if let Node::Row(items) = node {
         if items.iter().any(|n| matches!(n, Node::Newline)) {
             let env = if items.iter().any(|n| matches!(n, Node::Align)) {
@@ -24,8 +22,7 @@ pub fn to_latex(node: &Node) -> String {
 }
 
 /// LaTeX for a `LEFT`/`RIGHT` delimiter as written in the script. `None` marks
-/// a delimiter the language does not accept (DESIGN.md §5 -- the parser
-/// validates `LEFT`/`RIGHT` arguments against this same map).
+/// a delimiter the language does not accept.
 pub fn delimiter_latex(raw: &str) -> Option<&'static str> {
     Some(match raw {
         "(" => "(",

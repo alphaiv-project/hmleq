@@ -9,12 +9,11 @@
 /// How sub/superscripts attach to a symbol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ScriptPos {
-    /// Like any ordinary term (`\int`, `\sin`, plain letters).
+    /// Like any ordinary term (`int`, `sin`, plain letters).
     Normal,
-    /// Below/above in display style: emit the plain LaTeX command and let TeX
-    /// place the limits (`\sum`, `\lim`).
+    /// Scripts sit below/above the symbol in display style (`sum`, `lim`).
     Below,
-    /// Forced beside: append `\nolimits` before the scripts (`smallsum`, `Lim`).
+    /// Scripts forced beside the symbol even in display style (`smallsum`, `Lim`).
     Beside,
 }
 
@@ -40,10 +39,10 @@ pub struct SymDef {
     /// Canonical keyword name.
     pub name: &'static str,
     pub kind: SymKind,
-    /// Primary LaTeX. For `Accent` this is a one-argument macro (`\vec`).
+    /// Rendered form. For `Accent` it wraps the following term.
     pub latex: &'static str,
-    /// `BigOp` only: LaTeX emitted when the operator carries no scripts
-    /// (`union` -> `\cup` vs `\bigcup`). `None` elsewhere.
+    /// `BigOp` only: smaller binary form used when the operator carries no
+    /// scripts (`union` shrinks from big ⋃ to binary ∪). `None` elsewhere.
     pub bin_latex: Option<&'static str>,
     pub scripts: ScriptPos,
 }
@@ -101,8 +100,7 @@ pub enum Cmd {
     Not,
     /// `buildrel` (and its alias `rel`).
     BuildRel,
-    /// `big`/`Big`/`bigg`/`Bigg` -- payload is the LaTeX size command
-    /// (`"\\big"`, `"\\Big"`, `"\\bigg"`, `"\\Bigg"`).
+    /// `big`/`Big`/`bigg`/`Bigg` -- payload is the rendered size command.
     Big(&'static str),
     /// `sup` keyword -- same as `^`.
     Sup,
@@ -160,12 +158,12 @@ const fn func_below(name: &'static str, latex: &'static str) -> SymDef {
 const fn func_beside(name: &'static str, latex: &'static str) -> SymDef {
     def(name, SymKind::Func, latex, None, ScriptPos::Beside)
 }
-/// Large operator with no separate binary form (`\sum`, `\int`, `small*`).
+/// Large operator with no separate binary form (`sum`, `int`, `small*`).
 const fn bigop(name: &'static str, latex: &'static str, scripts: ScriptPos) -> SymDef {
     def(name, SymKind::BigOp, latex, None, scripts)
 }
 /// Large operator that shrinks to `bin_form` when it carries no scripts
-/// (`union` -> `\bigcup` with limits, `\cup` bare).
+/// (`union`: big ⋃ with scripts, binary ∪ bare).
 const fn bigop_bin(
     name: &'static str,
     latex: &'static str,
@@ -187,7 +185,7 @@ static EXACT_SYMS: &[SymDef] = &[
     func("Exp", r"\operatorname{Exp}"),
     func_below("Pr", r"\Pr"),
     // -- Greek capitals (REFERENCE §4.5) ----------------------------------
-    // Those whose shape is a Latin letter map to that letter, not a macro.
+    // Those whose shape is a Latin letter render as that plain letter.
     ord("Alpha", "A"),
     ord("Beta", "B"),
     ord("Gamma", r"\Gamma"),
@@ -254,7 +252,7 @@ static CI_SYMS: &[SymDef] = &[
     ord("mu", r"\mu"),
     ord("nu", r"\nu"),
     ord("xi", r"\xi"),
-    // no `\omicron` exists in TeX -- it is just a roman `o`.
+    // omicron has no distinct glyph -- it is just a roman `o`.
     ord("omicron", "o"),
     ord("pi", r"\pi"),
     ord("rho", r"\rho"),
@@ -269,7 +267,7 @@ static CI_SYMS: &[SymDef] = &[
     ord("vartheta", r"\vartheta"),
     ord("varpi", r"\varpi"),
     ord("varsigma", r"\varsigma"),
-    // no lowercase variant upsilon in TeX; DESIGN.md §5 pins it to `\Upsilon`.
+    // no lowercase variant upsilon exists; DESIGN.md §5 pins it to the capital.
     ord("varupsilon", r"\Upsilon"),
     ord("varphi", r"\varphi"),
     ord("varepsilon", r"\varepsilon"),
@@ -343,7 +341,7 @@ static CI_SYMS: &[SymDef] = &[
     ord("prime", r"\prime"),
     bin("diamond", r"\diamond"),
     // `deg` is listed both as a symbol (§4.9) and as a base function (§4.10);
-    // DESIGN.md §5 resolves it to the function `\deg` (see the Func block).
+    // DESIGN.md §5 resolves it to the function form (see the Func block).
     // -- big operators (REFERENCE §4.2) -----------------------------------
     bigop("sum", r"\sum", ScriptPos::Below),
     bigop("prod", r"\prod", ScriptPos::Below),
@@ -356,7 +354,7 @@ static CI_SYMS: &[SymDef] = &[
     bigop_bin("union", r"\bigcup", r"\cup", ScriptPos::Below),
     bigop_bin("inter", r"\bigcap", r"\cap", ScriptPos::Below),
     bigop_bin("dsum", r"\bigoplus", r"\oplus", ScriptPos::Below),
-    // `small*`: same glyph, scripts forced beside it (`\nolimits`).
+    // `small*`: same glyph, scripts forced beside it.
     bigop("smallsum", r"\sum", ScriptPos::Beside),
     bigop("smallprod", r"\prod", ScriptPos::Beside),
     bigop("smallint", r"\int", ScriptPos::Beside),
@@ -397,7 +395,7 @@ static CI_SYMS: &[SymDef] = &[
     func_below("min", r"\min"),
     func_below("det", r"\det"),
     func_below("gcd", r"\gcd"),
-    // -- accents (REFERENCE §4.4) -- one-argument macros --------------------
+    // -- accents (REFERENCE §4.4) -- each consumes the following term -------
     accent("acute", r"\acute"),
     accent("grave", r"\grave"),
     accent("dot", r"\dot"),
@@ -638,7 +636,7 @@ mod tests {
             (sym("dsum").latex, sym("dsum").bin_latex),
             (r"\bigoplus", Some(r"\oplus"))
         );
-        // small* share the glyph but force \nolimits and never shrink.
+        // small* share the glyph but force scripts beside and never shrink.
         let small = sym("smallsum");
         assert_eq!(
             (small.latex, small.bin_latex, small.scripts),
