@@ -269,7 +269,7 @@ mod tests {
         assert_eq!(to_latex(&Node::Symbol(&LIM_EXACT)), r"\lim");
     }
 
-    /// Script bases are bare -- only a Row of ≥ 2 items needs braces.
+    /// Script bases are bare -- only a Row of >= 2 items needs braces.
     #[test]
     fn row_script_base_is_braced() {
         let row = script(
