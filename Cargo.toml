@@ -1,0 +1,25 @@
+[package]
+name = "hmleq"
+version = "0.2.0"
+edition = "2021"
+description = "Parser for the Hancom HWP(한글) equation script language — serde-serializable AST, optional LaTeX emitter"
+license = "MIT"
+repository = "https://github.com/alphaiv-project/hmleq"
+keywords = ["hwp", "hml", "equation", "latex", "parser"]
+categories = ["parser-implementations"]
+
+[workspace]
+members = ["cli"]
+
+[features]
+default = ["latex"]
+# LaTeX emitter (`latex` module, `to_latex`/`eq_to_latex`).
+latex = []
+# serde Serialize/Deserialize on the AST (symbols round-trip by canonical name).
+serde = ["dep:serde"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"], optional = true }
+
+[dev-dependencies]
+serde_json = "1"
