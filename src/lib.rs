@@ -13,11 +13,10 @@
 //! # Features
 //!
 //! - `latex` *(default)* -- the [`latex`] module plus [`to_latex`] /
-//!   [`eq_to_latex`] and the `hmleq` CLI.
+//!   [`eq_to_latex`].
 //! - `serde` -- `Serialize`/`Deserialize` on the whole AST. Symbols serialize
 //!   as their canonical keyword name and are resolved back through the
 //!   keyword table on deserialization, so trees round-trip.
-//! - `json` -- `--json` output in the CLI (implies `serde`).
 
 pub mod ast;
 pub mod error;

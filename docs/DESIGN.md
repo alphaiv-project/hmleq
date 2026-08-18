@@ -12,7 +12,7 @@ output). Where this file makes a choice REFERENCE.md leaves open, this file wins
 | `src/error.rs`                   | `ParseError`                | FROZEN -- do not modify                                    |
 | `src/token.rs`                   | `Token`, `TokenKind`        | FROZEN -- do not modify                                    |
 | `src/ast.rs`                     | `Node`, `SpaceKind`         | FROZEN -- do not modify                                    |
-| `src/lib.rs`, `src/bin/hmleq.rs` | public API, CLI             | FROZEN -- do not modify                                    |
+| `src/lib.rs`, `cli/src/main.rs`  | public API, CLI             | FROZEN -- do not modify                                    |
 | `src/symbols.rs`                 | keyword tables + `lookup()` | agent **symbols** (pub types are FROZEN; rewrite the rest) |
 | `src/lexer.rs`                   | `lex()`                     | agent **lexer**                                            |
 | `src/parser.rs`                  | `parse()`                   | agent **parser**                                           |
@@ -20,10 +20,12 @@ output). Where this file makes a choice REFERENCE.md leaves open, this file wins
 | `tests/examples.rs`              | integration tests           | agent **tests**                                            |
 
 Rust 2021. The core (lexer/parser/AST) is dependency-free; cargo features add the rest:
-`latex` _(default)_ gates the emitter, `to_latex`/`eq_to_latex` and the CLI; `serde`
+`latex` _(default)_ gates the emitter and `to_latex`/`eq_to_latex`; `serde`
 (optional dep) derives `Serialize`/`Deserialize` on the AST -- symbols serialize as their
 canonical keyword name and deserialize through `symbols::find_by_name`, `Big` sizes are
-validated against the four LaTeX size commands; `json` adds the CLI's `--json` output.
+validated against the four LaTeX size commands. The CLI (`hmleq-cli`) is a separate
+workspace member whose `--json` output is always built in via its own `serde_json`
+dependency.
 
 _(The per-file agent ownership below applied to the initial build workflow and is kept
 for historical context.)_ Each agent owns exactly one file and must not edit any other.
